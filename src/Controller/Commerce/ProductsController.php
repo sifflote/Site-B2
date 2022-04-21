@@ -16,4 +16,10 @@ class ProductsController extends AbstractController
             'controller_name' => 'ProductsController',
         ]);
     }
+
+    #[Route('/slug', name: 'details')]
+    public function details(): Response
+    {
+        return $this->render('commerce/products/details.html.twig');
+    }
 }
