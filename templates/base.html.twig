@@ -16,56 +16,18 @@
         <script src="https://kit.fontawesome.com/7b92b2d2f2.js" crossorigin="anonymous"></script>
     </head>
     <body class="bg-light">
-    <nav class="navbar navbar-expand-lg fixed-top navbar-dark bg-dark" aria-label="Main navigation">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">Offcanvas navbar</a>
-            <button class="navbar-toggler p-0 border-0" type="button" id="navbarSideCollapse" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-
-            <div class="navbar-collapse offcanvas-collapse" id="navbarsExampleDefault">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="{{ path('commerce_index') }}">E-commerce</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Notifications</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Profile</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Switch account</a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-bs-toggle="dropdown" aria-expanded="false">Settings</a>
-                        <ul class="dropdown-menu" aria-labelledby="dropdown01">
-                            <li><a class="dropdown-item" href="#">Action</a></li>
-                            <li><a class="dropdown-item" href="#">Another action</a></li>
-                            <li><a class="dropdown-item" href="#">Something else here</a></li>
-                        </ul>
-                    </li>
-                </ul>
-                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                    {% if app.user %}
-                        <li class="nav-item">
-                            <a href="#" class="nav-link">Mon compte</a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ path('app_logout') }}" class="nav-link">Me déconnecter</a>
-                        </li>
-                    {% else %}
-                        <li class="nav-item">
-                            <a href="{{ path('app_login') }}" class="nav-link">Me connecter</a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ path('app_register') }}" class="nav-link">M'inscrire</a>
-                        </li>
-                    {% endif %}
-                </ul>
+        {% include "_partials/_nav.html.twig" %}
+        {% if app.user and app.user.isVerified == false %}
+            <div class="alert alert-warning alert-dismissible" role="alert">
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <div class="alert-message">
+                    <strong>Votre compte n'est pas activé</strong>, <a href="{{ path('resend_verif') }}">renvoyer le lien d'activation</a>.
+                </div>
             </div>
-        </div>
-    </nav>
+        {% endif %}
+
+        {% include "_partials/_flash.html.twig" %}
+
         {% block body %}{% endblock %}
     </body>
 </html>
