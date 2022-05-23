@@ -1,6 +1,6 @@
 <nav class="navbar navbar-expand-lg fixed-top navbar-dark bg-dark" aria-label="Main navigation">
     <div class="container-fluid">
-        <a class="navbar-brand" href="#">Offcanvas navbar</a>
+        <a class="navbar-brand" href="{{ path('main') }}">Sifflote</a>
         <button class="navbar-toggler p-0 border-0" type="button" id="navbarSideCollapse" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -8,10 +8,15 @@
         <div class="navbar-collapse offcanvas-collapse" id="navbarsExampleDefault">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="{{ path('commerce_index') }}">E-commerce</a>
+                    <a class="nav-link{% if 'commerce' in current_path %} active{% endif %}" aria-current="page" href="{{ path('commerce_index') }}">Test commerce</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Notifications</a>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle{% if 'b2' in current_path %} active{% endif %}" href="#" id="dropdown01" data-bs-toggle="dropdown" aria-expanded="false">Rejets B2</a>
+                    <ul class="dropdown-menu" aria-labelledby="dropdown01">
+                        <li><a class="dropdown-item{% if 'b2_extractions' in current_path %} active{%  endif %}" href="{{ path('b2_extractions') }}">Liste des extractions</a></li>
+                        <li><a class="dropdown-item" href="#">{{ current_path }}</a></li>
+                        <li><a class="dropdown-item" href="#">Something else here</a></li>
+                    </ul>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#">Profile</a>

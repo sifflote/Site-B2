@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Entity\B2\Traitements;
 use App\Entity\Commerce\Orders;
 use App\Entity\Trait\CreatedAtTrait;
 use App\Repository\UsersRepository;
@@ -9,6 +10,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use phpDocumentor\Reflection\Types\Boolean;
+use phpDocumentor\Reflection\Types\Integer;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -30,11 +32,14 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'json')]
     private $roles = [];
 
-    #[ORM\Column(type: 'string')]
+    #[ORM\Column(type: 'string', nullable: true)]
     private $password;
 
     #[ORM\Column(type: 'string', length: 100)]
     private $username;
+
+    #[ORM\Column(type: 'string', length: 50, nullable: true)]
+    private $google_id;
 
     #[ORM\Column(type: 'boolean')]
     private $is_verified = false;
@@ -45,10 +50,14 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'users', targetEntity: Orders::class)]
     private $orders;
 
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Traitements::class)]
+    private $b2_traitements;
+
     public function __construct()
     {
         $this->orders = new ArrayCollection();
         $this->created_at = new \DateTimeImmutable();
+        $this->b2_traitements = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -100,7 +109,7 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @see PasswordAuthenticatedUserInterface
      */
-    public function getPassword(): string
+    public function getPassword(): ?string
     {
         return $this->password;
     }
@@ -129,6 +138,18 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
     public function setUsername(string $username): self
     {
         $this->username = $username;
+
+        return $this;
+    }
+
+    public function getGoogleId(): ?Int
+    {
+        return $this->google_id;
+    }
+
+    public function setGoogleID(string $google_id): self
+    {
+        $this->google_id = $google_id;
 
         return $this;
     }
@@ -180,6 +201,36 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($order->getUsers() === $this) {
                 $order->setUsers(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Traitements>
+     */
+    public function getB2Traitements(): Collection
+    {
+        return $this->b2_traitements;
+    }
+
+    public function addB2Traitement(Traitements $b2Traitement): self
+    {
+        if (!$this->b2_traitements->contains($b2Traitement)) {
+            $this->b2_traitements[] = $b2Traitement;
+            $b2Traitement->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeB2Traitement(Traitements $b2Traitement): self
+    {
+        if ($this->b2_traitements->removeElement($b2Traitement)) {
+            // set the owning side to null (unless already changed)
+            if ($b2Traitement->getUser() === $this) {
+                $b2Traitement->setUser(null);
             }
         }
 

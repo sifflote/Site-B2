@@ -65,3 +65,9 @@ body {
 .text-white-50 { color: rgba(255, 255, 255, .5); }
 
 .bg-purple { background-color: #6f42c1; }
+
+hr.separation {
+  border-color: #F05F44 !important;
+  height: 3px !important;
+  max-width: 65px !important;
+}

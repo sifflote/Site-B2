@@ -16,6 +16,7 @@
         <script src="https://kit.fontawesome.com/7b92b2d2f2.js" crossorigin="anonymous"></script>
     </head>
     <body class="bg-light">
+    {% set current_path = app.request.get('_route') %}
         {% include "_partials/_nav.html.twig" %}
         {% if app.user and app.user.isVerified == false %}
             <div class="alert alert-warning alert-dismissible" role="alert">

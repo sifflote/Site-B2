@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des extractions B2{% endblock %}
+
+{% block body %}
+    <main class="container">
+        <section class="row">
+            <h1>Liste des extractions<a href="{{ path('b2_upload') }}" class="link-dark"><i class="fa-solid fa-file-import"></i></a></h1>
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Fichier</th>
+                    <th scope="col">Date d'extraction</th>
+                    <th scope="col-1">A lire?</th>
+                    <th scope="col-1"></th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for extraction in extractions %}
+                    {%  set files = extraction.name|split('.') %}
+
+                <tr>
+                    <th scope="row">{{ extraction.id }}</th>
+                    <td>{{ extraction.name }}</td>
+                    <td>{{ extraction.importAt|date("d/m/Y") }}</td>
+                    <td>{% for i in range((1 + extraction.verify), extraction.files) %}
+                            {% if extraction.files > extraction.verify %}
+                                {% if i > (1 + extraction.verify) %} - {% endif %}
+                                {% if loop.first %}
+                                   <a href="{{ path('b2_lecture', {file: i ~ 'part-' ~ files|first}) }}" class="link-primary">
+                                {% endif %}
+                                        <i class="fa-solid fa-{{ i }}"></i>
+                                {% if loop.first %}
+                                    </a>
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td>{% if loop.first %}<i class="fa-solid fa-code-merge"></i>{%  endif %}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+{% endblock %}
