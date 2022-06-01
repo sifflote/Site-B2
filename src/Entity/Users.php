@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Entity\B2\RejetsParametres;
 use App\Entity\B2\Traitements;
 use App\Entity\Commerce\Orders;
 use App\Entity\Trait\CreatedAtTrait;
@@ -44,7 +45,7 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'boolean')]
     private $is_verified = false;
 
-    #[ORM\Column(type: 'string', length: 100)]
+    #[ORM\Column(type: 'string', length: 100, nullable: true)]
     private $resetToken;
 
     #[ORM\OneToMany(mappedBy: 'users', targetEntity: Orders::class)]
@@ -52,6 +53,9 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Traitements::class)]
     private $b2_traitements;
+
+    #[ORM\Column(type: 'integer', options: ["default" => 500])]
+    private $B2LimitPage = 500;
 
     public function __construct()
     {
@@ -236,4 +240,18 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
+
+    public function getB2LimitPage(): ?int
+    {
+        return $this->B2LimitPage;
+    }
+
+    public function setB2LimitPage(int $B2LimitPage): self
+    {
+        $this->B2LimitPage = $B2LimitPage;
+
+        return $this;
+    }
+
+
 }

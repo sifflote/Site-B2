@@ -22,6 +22,12 @@ class Observations
     #[ORM\OneToMany(mappedBy: 'observation', targetEntity: Traitements::class)]
     private $traitements;
 
+    #[ORM\Column(type: 'string', length: 50, nullable: true)]
+    private $color;
+
+    #[ORM\Column(type: 'string', length: 50, nullable: true)]
+    private $bgcolor;
+
     public function __construct()
     {
         $this->traitements = new ArrayCollection();
@@ -70,6 +76,35 @@ class Observations
                 $traitement->setObservation(null);
             }
         }
+
+        return $this;
+    }
+
+    public function __toString(): string
+    {
+        return $this->getName();
+    }
+
+    public function getColor(): ?string
+    {
+        return $this->color;
+    }
+
+    public function setColor(?string $color): self
+    {
+        $this->color = $color;
+
+        return $this;
+    }
+
+    public function getBgcolor(): ?string
+    {
+        return $this->bgcolor;
+    }
+
+    public function setBgcolor(?string $bgcolor): self
+    {
+        $this->bgcolor = $bgcolor;
 
         return $this;
     }

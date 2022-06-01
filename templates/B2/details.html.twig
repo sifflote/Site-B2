@@ -1,0 +1,191 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des Titres en rejets B2{% endblock %}
+
+{% block body %}
+    <div class="nav-scroller bg-body shadow-sm">
+        <nav class="nav nav-underline" aria-label="Secondary navigation">
+            <a class="nav-link active" aria-current="page" href="{{ path('b2_titres', {'_fragment' : titre.reference}) }}">Retour</a>
+
+
+        </nav>
+    </div>
+    <div class="container">
+        <main>
+            <div class="pt-5 text-center">
+                <h2>{% if last is not null %}
+                    <span class="bg-{{ last.observation.bgcolor }}" text-{{ last.observation.color }}">{{ titre.type }} - Titre n° {{ titre.reference }}</span></h2>
+                {%  else %}
+                <h2>{{ titre.type }} - Titre n° {{ titre.reference }}</span></h2>
+                {% endif %}
+                {% if titre.rprs == 0 %}
+                    <h2 class="text-muted bg-dark"><i class="fa-solid fa-circle-question"></i> RPRS <i class="fa-solid fa-circle-question"></i></h2>
+                {% else %}
+                    <h2 class="text-info bg-dark"><i class="fa-solid fa-circle-check"></i> RPRS <i class="fa-solid fa-circle-check"></i></h2>
+                {% endif %}
+                    <p class="text-muted">Lot N° {{ titre.lot }} - Crée le {{ titre.creeAt|date('d/m/Y') }}, Rejeté le {{ titre.rejetAt|date('d/m/Y') }}</p>
+            </div>
+            <hr />
+
+            <div class="row g-5">
+                <div class="col-md-5 col-lg-4 order-md-last">
+                    <h4 class="d-flex justify-content-between align-items-center mb-3">
+                        {% if last is not null %}
+                            <span class="bg-{{ last.observation.bgcolor }}" text-{{ last.observation.color }}">{{ last.observation.name }}</span>
+                        {% else %}
+                            <span class="text-danger">NOUVEAU / NON TRAITE</span>
+                        {% endif %}
+                        {% if last is not null %}
+                            <span class="badge rounded-pill bg-{{ last.observation.bgcolor }}  text-{{ last.observation.color }}">{% for h in historiques %}{% if loop.first %}{{ loop.length }}{% endif %}{% endfor %}</span>
+                        {% endif %}
+                    </h4>
+                    {% if last is not null %}
+                    <ul class="list-group mb-3">
+                        <li class="list-group-item d-flex justify-content-between lh-sm">
+                            <div>
+                                <small class="text-muted">Précisions</small>
+                                <h3 class="my-0">{{ last.precisions }}</h3>
+                            </div>
+                            <span class="text-muted">{{ last.user.username }} - {{ last.traiteAt|date('d/m/Y') }}</span>
+                        </li>
+                    </ul>
+                    {% endif %}
+                        <hr />
+
+                    {{ form_start(form) }}
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" name="rprs" {% if titre.rprs == true %}checked{% endif %} %}>
+                        <label class="form-check-label" for="flexSwitchCheckDefault">RPRS</label>
+                    </div>
+                    {{ form_end(form) }}
+                    <hr />
+                        <small class="text-muted">Historique</small>
+
+                    <ul class="list-group mb-3">
+                        {% for h in historiques %}
+                        <li class="list-group-item d-flex justify-content-between lh-sm">
+                            <div>
+                                <h6 class="my-0">{{ h.observation.name }}</h6>
+                                <small class="text-muted">{{ h.traiteAt|date('d/m/Y') }}:
+                                    {{ h.precisions }}
+                                </small>
+                            </div>
+                            <span class="text-muted">{{ h.user.username }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="col-md-7 col-lg-8">
+                        <div class="row g-3">
+                            <div class="col-sm-6">
+                                <small class="text-muted">IEP</small>
+                                <h5 class="my-0">{{ titre.iep }}</h5>
+                            </div>
+
+                            <div class="col-sm-6">
+                                <small class="text-muted">IPP</small>
+                                <h5 class="my-0">{{ titre.ipp }}</h5>
+                            </div>
+                            <div class="col-sm-6">
+                                <small class="text-muted">Entrée</small>
+                                <h5 class="my-0">{{ titre.enterAt|date('d/m/Y') }}</h5>
+                                <small class="text-muted">
+                                    {% if titre.type != 'FS' %}
+                                        Consultations
+                                    {% elseif titre.type == 'FS' and nb_jours == 1 %}
+                                        Ambulatoire
+                                    {% else %}
+                                        {{ nb_jours }} Jours
+                                    {% endif %}
+                                </small>
+                            </div>
+
+                            <div class="col-sm-6">
+                                <small class="text-muted">Sortie</small>
+                                <h5 class="my-0">{{ titre.exitAt|date('d/m/Y') }}</h5>
+                            </div>
+                            <div class="col-12">
+                                <small class="text-muted">Désignation - UH</small>
+                                <h5 class="my-0">{{ titre.designation }} - UH {{ titre.uh.numero }}</h5>
+                            </div>
+                        </div>
+                        <hr class="my-4">
+
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <small class="text-muted">Client</small>
+                                <h5 class="my-0">{{ titre.payeur }} - {{ titre.name }}</h5>
+                            </div>
+
+                            <div class="col-12">
+                                <small class="text-muted">Rejet</small>
+                                <h5 class="my-0">{{ titre.codeRejet }} - {{ titre.descRejet }}</h5>
+                            </div>
+
+                            <div class="col-12">
+                                <small class="text-muted">N° Contrat / N° PEC</small>
+                                <h5 class="my-0">{{ titre.contrat }} / {{ titre.pec }}</h5>
+                            </div>
+                        </div>
+                            <hr class="my-4">
+                        <div class="row g-3">
+                            <div class="row g-3">
+                            <div class="col-md-4">
+                                <small class="text-muted">Montant TTC</small>
+                                <h5 class="my-0">{{ titre.montant|format_currency('EUR', locale='fr') }}</h5>
+                            </div>
+
+                            <div class="col-md-4">
+                                <small class="text-muted">Encaissement</small>
+                                <h5 class="my-0 text-danger">{{ titre.encaissement|format_currency('EUR', locale='fr') }}</h5>
+                            </div>
+
+                            <div class="col-md-4">
+                                <small class="text-muted">Restant dû</small>
+                                <h5 class="my-0 text-success">{{ titre.restantdu|format_currency('EUR', locale='fr') }}</h5>
+                            </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+                        <div class="row g-3">
+                            <div class="col-sm-6">
+                                <small class="text-muted">N° INSEE - Rang de naissance</small>
+                                <h5 class="my-0">{{ titre.insee }} - {{ titre.rang }}</h5>
+                            </div>
+
+                            <div class="col-sm-6">
+                                <small class="text-muted">Date de naissance / Hors format</small>
+                                <h5 class="my-0">{{ titre.naissanceAt|date('d/m/Y') }} - {{ titre.naissanceHf }}</h5>
+                            </div>
+                        </div>
+                        <hr class="my-4">
+                    <div class="row py-2 bg-dark">
+                        <div class="col-sm-6">
+                            <small class="text-muted">Autre titre en rejet sur cet IEP</small>
+                            {% for iep in ieps %}
+                                <h6 class="my-0 text-white">
+                                    {% if iep.reference != titre.reference %}
+                                        <a href="{{ path('b2_titre_details', {ref: iep.reference}) }}" class="link-light">{{ iep.reference }}</a>
+                                    {% endif %}
+                                </h6>
+                            {% endfor %}
+                        </div>
+
+                        <div class="col-sm-6">
+                            <small class="text-muted">Autre IEP en rejet pour IPP</small>
+                            {% for ipp in ipps %}
+                                <h6 class="my-0 text-white">
+                                    {% if ipp.iep != titre.iep %}
+                                        <a href="{{ path('b2_group', {filter: 'iep',value: ipp.iep}) }}" class="link-light">{{ ipp.iep }}</a>
+                                    {% endif %}
+                                </h6>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+{% endblock %}

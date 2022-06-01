@@ -3,45 +3,99 @@
 {% block title %}Liste des extractions B2{% endblock %}
 
 {% block body %}
+    <div class="nav-scroller bg-body shadow-sm">
+        <nav class="nav nav-underline" aria-label="Secondary navigation">
+            <a class="nav-link" aria-current="page" href="{{ path('b2_titres') }}">Rejets B2</a>
+            <a class="nav-link" href="#">
+
+                <span class="badge bg-light text-dark rounded-pill align-text-bottom"></span>
+            </a>
+            <a class="nav-link active" href="{{ path('b2_titres') }}">Extractions</a>
+            <a class="nav-link active link-success" href="{{ path('b2_upload') }}"><i class="fa-solid fa-file-import"></i></a>
+
+        </nav>
+    </div>
     <main class="container">
         <section class="row">
-            <h1>Liste des extractions<a href="{{ path('b2_upload') }}" class="link-dark"><i class="fa-solid fa-file-import"></i></a></h1>
-            <table class="table table-striped">
+
+            <table class="table table-striped table-bordered">
                 <thead>
                 <tr>
                     <th scope="col">#</th>
                     <th scope="col">Fichier</th>
-                    <th scope="col">Date d'extraction</th>
-                    <th scope="col-1">A lire?</th>
-                    <th scope="col-1"></th>
+                    <th scope="col" class="text-center">Nb Rejets</th>
+                    <th scope="col" class="text-center">New Rejets</th>
+                    <th scope="col" class="text-center">Observations</th>
+                    <th scope="col" class="text-center">Rapprochés</th>
+                    <th scope="col" class="text-center">Date d'extraction</th>
+                    <th scope="col-2" class="text-center">Vérifier titre</th>
+                    <th scope="col-2" class="text-center">Vérifier Obs</th>
+                    <th scope="col"></th>
                 </tr>
                 </thead>
                 <tbody>
+                {% set totalrejet = 0 %}
+                {% set totalrapproche = 0 %}
                 {% for extraction in extractions %}
-                    {%  set files = extraction.name|split('.') %}
+                    {% set files = extraction.name|split('.') %}
+                    {% set totalrejet = totalrejet + extraction.newLine %}
+                    {% set totalrapproche = totalrapproche + extraction.rapproche %}
 
                 <tr>
                     <th scope="row">{{ extraction.id }}</th>
                     <td>{{ extraction.name }}</td>
-                    <td>{{ extraction.importAt|date("d/m/Y") }}</td>
-                    <td>{% for i in range((1 + extraction.verify), extraction.files) %}
+                    <td class="text-center">{{ extraction.countLine }}</td>
+                    <td class="text-center">{{ extraction.newLine }}</td>
+                    <td class="text-center">{{ extraction.countObs }}</td>
+                    <td class="text-center">{{ extraction.rapproche }}</td>
+                    <td class="text-center">{{ extraction.importAt|date("d/m/Y H:m:s") }}</td>
+                    <td class="text-center">{% for i in range((1 + extraction.verify), extraction.files) %}
                             {% if extraction.files > extraction.verify %}
-                                {% if i > (1 + extraction.verify) %} - {% endif %}
                                 {% if loop.first %}
-                                   <a href="{{ path('b2_lecture', {file: i ~ 'part-' ~ files|first}) }}" class="link-primary">
-                                {% endif %}
-                                        <i class="fa-solid fa-{{ i }}"></i>
-                                {% if loop.first %}
+                                    {{ i }} / {{ extraction.files }} <a href="{{ path('b2_lecture', {file: i ~ 'part-' ~ files|first}) }}" class="link-success">
+                                        <i class="fa-solid fa-forward-step"></i>
                                     </a>
                                 {% endif %}
                             {% endif %}
                         {% endfor %}
                     </td>
-                    <td>{% if loop.first %}<i class="fa-solid fa-code-merge"></i>{%  endif %}</td>
+                    <td class="text-center">{% for i in range((1 + extraction.verify2), extraction.files) %}
+                            {% if extraction.verify > extraction.verify2 %}
+                                {% if loop.first %}
+                                    {{ i }} / {{ extraction.files }}{% if extraction.verify == extraction.files %} <a href="{{ path('b2_verify', {file: i ~ 'part-' ~ files|first}) }}" class="link-danger">
+                                    <i class="fa-solid fa-forward-step"></i>
+                                    </a>{% endif %}
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}</td>
+                    <td>
+                            {% if extraction.files == extraction.verify and extraction.files == extraction.verify2 %}
+                                {% if extraction.isPurge == 1 %}
+                                    <span class="text-success"><i class="fa-solid fa-circle-check"></i></span>
+                                {% else %}
+                                    <a class="nav-link active link-danger" href="{{ path('b2_purge') }}"><i class="fa-solid fa-recycle"></i></a>
+                                {% endif %}
+                            {% else %}
+                                <span class="text-danger"><i class="fa-solid fa-circle-xmark"></i></span>
+                            {% endif %}
+                    </td>
                 </tr>
                 {% endfor %}
+                <tr class="table-warning">
+                    <th colspan="2" class="text-center">Total</th>
+                    <th></th>
+                    <th class="text-center">
+                        {{ totalrejet }}
+                    </th>
+                    <th></th>
+                    <th class="text-center">
+                        {{ totalrapproche }}
+                    </th>
+                    <th colspan="4"></th>
+                </tr>
                 </tbody>
             </table>
+
         </section>
     </main>
 

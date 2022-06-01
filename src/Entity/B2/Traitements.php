@@ -30,7 +30,7 @@ class Traitements
     #[ORM\Column(type: 'text', nullable: true)]
     private $precisions;
 
-    #[ORM\Column(type: 'date', nullable: true)]
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     private $traite_at;
 
     public function getId(): ?int
@@ -86,12 +86,12 @@ class Traitements
         return $this;
     }
 
-    public function getTraiteAt(): ?\DateTimeInterface
+    public function getTraiteAt(): ?\DateTimeImmutable
     {
         return $this->traite_at;
     }
 
-    public function setTraiteAt(?\DateTimeInterface $traite_at): self
+    public function setTraiteAt(?\DateTimeImmutable $traite_at): self
     {
         $this->traite_at = $traite_at;
 

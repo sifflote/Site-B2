@@ -1,0 +1,53 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des Titres en rejets B2{% endblock %}
+
+{% block body %}
+{% include "_partials/_b2.html.twig" %}
+
+    <main class="container-fluid">
+        <section class="row">
+            <h2></h2>
+        </section>
+        <div id="table-grid" class="text-center"></div>
+    </main>
+
+{% endblock %}
+{% block footer %}
+    <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
+    <script type="text/javascript">
+        new gridjs.Grid({
+            width: '1900px',
+            columns: ["Type", 'IEP', 'IPP', 'Montant', 'Référence', 'Entrée', 'Sortie', 'Nom', 'RPRS', 'Observation'],
+            server: {
+                url: '{{ path('b2_json') }}',
+                then: data => data.titres.map(titre =>
+                [titre.type, titre.iep, titre.ipp, titre.montant, titre.reference, titre.enter_at, titre.exit_at, titre.name, titre.rprs, titre.observation])
+            },
+            language: {
+                'search': {
+                    'placeholder': '🔍 Recherche...'
+                },
+                'pagination': {
+                    'previous': '⬅️',
+                    'next': '➡️',
+                    'showing': 'Affichage des résultats',
+                    'results': () => 'Résultats'
+                },
+            },
+            search: {
+                enabled: true
+
+            },
+            sort: true,
+            pagination: {
+                enabled: true,
+                limit: 100,
+                summary: true
+            }
+        }).render(document.getElementById("table-grid"));
+
+    </script>
+
+
+{% endblock %}

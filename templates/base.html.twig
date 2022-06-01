@@ -12,6 +12,7 @@
 
         {% block javascripts %}
             {{ encore_entry_script_tags('app') }}
+
         {% endblock %}
         <script src="https://kit.fontawesome.com/7b92b2d2f2.js" crossorigin="anonymous"></script>
     </head>
@@ -30,5 +31,10 @@
         {% include "_partials/_flash.html.twig" %}
 
         {% block body %}{% endblock %}
+    <footer class="footer mt-auto py-3 bg-light">
+        <div class="container">
+            <span class="text-muted float-end">Sifflote© 2021-2022</span>
+        </div>
+    </footer>
     </body>
 </html>

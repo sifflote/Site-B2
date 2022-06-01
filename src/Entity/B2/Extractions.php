@@ -26,6 +26,24 @@ class Extractions
     #[ORM\Column(type: 'integer')]
     private $verify;
 
+    #[ORM\Column(type: 'integer')]
+    private $verify2;
+
+    #[ORM\Column(type: 'integer')]
+    private $newLine = 0;
+
+    #[ORM\Column(type: 'integer')]
+    private $countLine = 0;
+
+    #[ORM\Column(type: 'integer', nullable: true)]
+    private $rapproche;
+
+    #[ORM\Column(type: 'boolean')]
+    private $isPurge = 0;
+
+    #[ORM\Column(type: 'integer')]
+    private $count_obs = 0;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -75,6 +93,78 @@ class Extractions
     public function setVerify(int $verify): self
     {
         $this->verify = $verify;
+
+        return $this;
+    }
+
+    public function getVerify2(): ?int
+    {
+        return $this->verify2;
+    }
+
+    public function setVerify2(int $verify2): self
+    {
+        $this->verify2 = $verify2;
+
+        return $this;
+    }
+
+    public function getNewLine(): ?int
+    {
+        return $this->newLine;
+    }
+
+    public function setNewLine(int $newLine): self
+    {
+        $this->newLine = $newLine;
+
+        return $this;
+    }
+
+    public function getCountLine(): ?int
+    {
+        return $this->countLine;
+    }
+
+    public function setCountLine(int $countLine): self
+    {
+        $this->countLine = $countLine;
+
+        return $this;
+    }
+
+    public function getRapproche(): ?int
+    {
+        return $this->rapproche;
+    }
+
+    public function setRapproche(?int $rapproche): self
+    {
+        $this->rapproche = $rapproche;
+
+        return $this;
+    }
+
+    public function getIsPurge(): ?bool
+    {
+        return $this->isPurge;
+    }
+
+    public function setIsPurge(bool $isPurge): self
+    {
+        $this->isPurge = $isPurge;
+
+        return $this;
+    }
+
+    public function getCountObs(): ?int
+    {
+        return $this->count_obs;
+    }
+
+    public function setCountObs(int $count_obs): self
+    {
+        $this->count_obs = $count_obs;
 
         return $this;
     }

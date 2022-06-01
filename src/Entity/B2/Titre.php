@@ -43,13 +43,13 @@ class Titre
     #[ORM\Column(type: 'date')]
     private $exit_at;
 
-    #[ORM\Column(type: 'integer')]
+    #[ORM\Column(type: 'float')]
     private $montant;
 
-    #[ORM\Column(type: 'integer', nullable: true)]
+    #[ORM\Column(type: 'float', nullable: true)]
     private $encaissement;
 
-    #[ORM\Column(type: 'integer', nullable: true)]
+    #[ORM\Column(type: 'float', nullable: true)]
     private $restantdu;
 
     #[ORM\Column(type: 'string', length: 20, nullable: true)]
@@ -97,14 +97,17 @@ class Titre
     #[ORM\Column(type: 'boolean', nullable: true)]
     private $rprs;
 
-    #[ORM\Column(type: 'date', nullable: true)]
-    private $maj;
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private $maj_at;
 
     #[ORM\OneToMany(mappedBy: 'titre', targetEntity: Traitements::class, orphanRemoval: true)]
     private $traitements;
 
     #[ORM\Column(type: 'datetime_immutable')]
     private $extraction_at;
+
+    #[ORM\Column(type: 'boolean')]
+    private $is_rapproche = false;
 
     public function __construct()
     {
@@ -225,36 +228,36 @@ class Titre
         return $this;
     }
 
-    public function getMontant(): ?int
+    public function getMontant(): ?float
     {
         return $this->montant;
     }
 
-    public function setMontant(int $montant): self
+    public function setMontant(float $montant): self
     {
         $this->montant = $montant;
 
         return $this;
     }
 
-    public function getEncaissement(): ?int
+    public function getEncaissement(): ?float
     {
         return $this->encaissement;
     }
 
-    public function setEncaissement(?int $encaissement): self
+    public function setEncaissement(?float $encaissement): self
     {
         $this->encaissement = $encaissement;
 
         return $this;
     }
 
-    public function getRestantdu(): ?int
+    public function getRestantdu(): ?float
     {
         return $this->restantdu;
     }
 
-    public function setRestantdu(?int $restantdu): self
+    public function setRestantdu(?float $restantdu): self
     {
         $this->restantdu = $restantdu;
 
@@ -453,14 +456,14 @@ class Titre
         return $this;
     }
 
-    public function getMaj(): ?\DateTimeInterface
+    public function getMajAt(): ?\DateTimeImmutable
     {
-        return $this->maj;
+        return $this->maj_at;
     }
 
-    public function setMaj(\DateTimeInterface $maj): self
+    public function setMajAt(\DateTimeImmutable $maj_at): self
     {
-        $this->maj = $maj;
+        $this->maj_at = $maj_at;
 
         return $this;
     }
@@ -503,6 +506,18 @@ class Titre
     public function setExtractionAt(\DateTimeImmutable $extraction_at): self
     {
         $this->extraction_at = $extraction_at;
+
+        return $this;
+    }
+
+    public function getIsRapproche(): bool
+    {
+        return $this->isRapproche;
+    }
+
+    public function setIsRapproche(bool $isRapproche): self
+    {
+        $this->isRapproche = $isRapproche;
 
         return $this;
     }

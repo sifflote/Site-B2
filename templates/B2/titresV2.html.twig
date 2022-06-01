@@ -1,0 +1,92 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des Titres en rejets B2{% endblock %}
+
+{% block body %}
+
+{% include "_partials/_b2.html.twig" %}
+
+    <main class="container">
+        <section class="row">
+
+            <h2><a href="{{ path('b2_titres') }}" class="link-primary">All</a> - <a href="" class="scroll">Dernier titre vue</a></h2>
+            <table class="table"
+                   data-toggle="table"
+                   data-search="true"
+                   data-show-columns="true"
+                   data-pagination="true"
+                   data-sortable="true">
+                <thead>
+                    <tr class="tr-class1">
+                        <th data-field="type" data-sortable="true">Type</th>
+                        <th data-field="iep" data-sortable="true">IEP</th>
+                        <th data-field="ipp" data-sortable="true">IPP</th>
+                        <th data-field="montant" data-sortable="true">montant</th>
+                        <th data-field="titre" data-sortable="true">Titre</th>
+                        <th data-field="enter_at" data-sortable="true">Entrée</th>
+                        <th data-field="exit_at" data-sortable="true">Sortie</th>
+                        <th data-field="name" data-sortable="true">Nom</th>
+                        <th data-field="rprs" data-sortable="true">RPRS</th>
+                        <th data-field="observation" data-sortable="true">Observation</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                {% for titre in titres %}
+                    <div class="jumptarget" id="{{ titre.reference }}"></div>
+                <tr id="tr-id-{{ titre.reference }}" class="tr-class-{{ titre.reference }}" data-title="bootstrap table" data-object='{"key": "value"}'>
+                    <td id="td-id-{{ titre.reference }}" class="td-class-{{ titre.reference }}">
+                        {{ titre.type }}
+                    </td>
+                    <td>
+                        {{ titre.iep }}
+                    </td>
+                    <td>
+                        {{ titre.ipp }}
+                    </td>
+                    <td class="text-end">
+                        {{ titre.montant|format_currency('EUR', locale='fr') }}
+                    </td>
+                    <td>
+                        <a href="{{ path('b2_titre_details', {ref: titre.reference }) }}" class="link-dark ">{{ titre.reference }}</a>
+                    </td>
+                    <td>
+                        {{ titre.enter_at }}
+                    </td>
+                    <td>
+                        {{ titre.exit_at }}
+                    </td>
+                    <td>
+                        {{ titre.name }}
+                    </td>
+                    <td>
+                        {{ titre.rprs }}
+                    </td>
+                    <td>
+
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </section>
+    </main>
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+    <script type="text/javascript">
+    if(window.location.hash) {
+        const hash = window.location.hash.substring(1);
+        var t = 'tr-id-' + hash
+        function onload() {
+            document.getElementById(t).className = " table-info";
+        }
+        window.onload = onload;
+        // hash found
+    }
+
+    $('#table').bootstrapTable({
+        locale: 'fr-FR'
+    })
+    </script>
+{% endblock %}

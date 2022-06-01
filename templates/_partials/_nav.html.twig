@@ -13,9 +13,8 @@
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle{% if 'b2' in current_path %} active{% endif %}" href="#" id="dropdown01" data-bs-toggle="dropdown" aria-expanded="false">Rejets B2</a>
                     <ul class="dropdown-menu" aria-labelledby="dropdown01">
-                        <li><a class="dropdown-item{% if 'b2_extractions' in current_path %} active{%  endif %}" href="{{ path('b2_extractions') }}">Liste des extractions</a></li>
-                        <li><a class="dropdown-item" href="#">{{ current_path }}</a></li>
-                        <li><a class="dropdown-item" href="#">Something else here</a></li>
+                        <li><a class="dropdown-item{% if 'b2_titres' in current_path %} active{%  endif %}" href="{{ path('b2_titres') }}">Liste de rejets</a></li>
+                        <li><a class="dropdown-item{% if 'b2_extractions' in current_path %} active{%  endif %}" href="{{ path('b2_extractions') }}">Extractions</a></li>
                     </ul>
                 </li>
                 <li class="nav-item">
@@ -36,10 +35,10 @@
             <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                 {% if app.user %}
                     <li class="nav-item">
-                        <a href="#" class="nav-link">Mon compte</a>
+                        <a href="{{ path('profile_index') }}" class="nav-link"><i class="fa-solid fa-user"></i></a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ path('app_logout') }}" class="nav-link">Me déconnecter</a>
+                        <a href="{{ path('app_logout') }}" class="nav-link"><i class="fa-solid fa-power-off"></i></a>
                     </li>
                 {% else %}
                     <li class="nav-item">

@@ -71,3 +71,32 @@ hr.separation {
   height: 3px !important;
   max-width: 65px !important;
 }
+
+.jumptarget::before {
+  content:"";
+  display:block;
+  height:50px; /* fixed header height*/
+  margin:-121px 0 0; /* negative fixed header height */
+}
+
+.fixed-table-loading {
+  visibility: hidden;
+  top: 0px;
+  display: none;
+}
+
+.loading-wrap {
+  visibility: hidden;
+  display: none;
+}
+
+.table-loading {
+  visibility: hidden;
+  display: none;
+}
+
+.loading {
+  visibility: hidden;
+  display: none;
+}
+
