@@ -14,7 +14,7 @@
         <main>
             <div class="pt-5 text-center">
                 <h2>{% if last is not null %}
-                    <span class="bg-{{ last.observation.bgcolor }}" text-{{ last.observation.color }}">{{ titre.type }} - Titre n° {{ titre.reference }}</span></h2>
+                    <span class="bg-{{ last.observation.bgcolor }} text-{{ last.observation.color }}">{{ titre.type }} - Titre n° {{ titre.reference }}</span></h2>
                 {%  else %}
                 <h2>{{ titre.type }} - Titre n° {{ titre.reference }}</span></h2>
                 {% endif %}
@@ -31,7 +31,7 @@
                 <div class="col-md-5 col-lg-4 order-md-last">
                     <h4 class="d-flex justify-content-between align-items-center mb-3">
                         {% if last is not null %}
-                            <span class="bg-{{ last.observation.bgcolor }}" text-{{ last.observation.color }}">{{ last.observation.name }}</span>
+                            <span class="bg-{{ last.observation.bgcolor }} text-{{ last.observation.color }}">{{ last.observation.name }}</span>
                         {% else %}
                             <span class="text-danger">NOUVEAU / NON TRAITE</span>
                         {% endif %}

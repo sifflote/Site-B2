@@ -13,10 +13,14 @@ import { Tooltip, Toast, Popover } from 'bootstrap';
 
 // start the Stimulus application
 
-import './bootstrap';
 //import $ from 'jquery';
 const $ = require('jquery');
-//global.$ = global.jQuery = $;
+global.$ = global.jQuery = $;
+import './bootstrap';
 
 
 import 'bootstrap-table';
+
+//const dt = require('datatables.net')();
+const dt = require('datatables.net');
+import 'datatables.net-bs5/js/dataTables.bootstrap5.min'

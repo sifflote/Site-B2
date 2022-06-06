@@ -7,6 +7,7 @@ use App\Entity\B2\Traitements;
 use App\Entity\B2\Uh;
 use App\Entity\Users;
 use App\Factory\JsonResponseFactory;
+use App\Form\B2\TraitementFormType;
 use App\Form\FileUploadType;
 use App\Repository\B2\ExtractionsRepository;
 use App\Repository\B2\ObservationsRepository;
@@ -32,49 +33,55 @@ class B2Controller extends AbstractController
     {
     }
 
-    #[Route('/B2/titres/{page?1}/{order?}/{sens?}', name: 'b2_titres', methods: ['GET','POST'])]
-    public function titres(TitreRepository $titreRepository, Request $request): Response
+    #[Route('/B2/titres', name: 'b2_titres')]
+    public function titres(TitreRepository $titreRepository,
+                           ObservationsRepository $observationsRepository,
+                           EntityManagerInterface $em,
+                           Request $request): Response
     {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+        $titres2 = $titreRepository->findBy(['is_rapproche' => 0]);
+        $observations = $observationsRepository->findBy([], ['name' => 'ASC']);
 
-        $perPage = ($this->getUser()->getB2limitPage() == 0 ? 10000 : $this->getUser()->getB2limitPage());
-        $page = (int)$request->get('page', 1);
+        $traitement = new Traitements();
+        $form = $this->createForm(TraitementFormType::class, $traitement);
+        $form->handleRequest($request);
 
-        $order = ($request->get('order') !== null) ? $request->get('order') : 'montant';
-        $sens = ($request->get('sens') !== null) ? $request->get('sens') : 'DESC';
-        //$titres = $titreRepository->findWithTraitement(0, 'montant', 'ASC');
-        //$titres = $titreRepository->findBy(['is_rapproche' => 0], [$order => $sens]);
-        $titres = $titreRepository->findByPaginated($page, $perPage, 0, $order, $sens);
-        $total = $titreRepository->getTotalRejetsNonRapproche();
-        $json = json_encode($titres);
-        return $this->render('B2/titres.html.twig', [
-            'titres' => $titres,
-            'json' => str_replace("'", "\'", $json),
-            'sort' => $request->get('order').'/'.$request->get('sens'),
-            'order_value' => $order,
-            'sens_value' => $sens,
-            'page' => $page,
-            'limit' => $perPage,
-            'total' => $total
+        if ($form->isSubmitted() && $form->isValid()) {
 
+            $titre = $titreRepository->findOneBy([
+                'reference' => $request->get('form_ref')
+            ]);
+            $now  = new \DateTimeImmutable();
+            $user = $this->getUser();
+            $rprs = ($request->request->get('rprs') !== 'on' ? false : true);
+            $traitement->setTitre($titre);
+            $traitement->setUser($user);
+            $traitement->setTraiteAt($now);
+            $titre->setRprs($rprs);
+
+            $observation = $observationsRepository->findOneBy([
+                'id' => $form->get('observation')->getData()
+            ]);
+            $traitement->setObservation($observation);
+
+            $traitement->setPrecisions($form->get('precisions')->getData());
+            $em->persist($traitement);
+            $em->persist($titre);
+            $em->flush();
+        }
+
+        return $this->renderForm('B2/titresV2.html.twig', [
+            'titres2' => $titres2,
+            'observations' => $observations,
+            'form' => $form
         ]);
-    }
-
-    #[Route('B2/changePage', name: 'b2_changepage')]
-    public function changePage(EntityManagerInterface $em, Request $request, UsersRepository $usersRepository)
-    {
-        $user = $usersRepository->findOneBy(['email' => $this->getUser()->getUserIdentifier()]);
-        $user->setB2LimitPage((int)$request->get('nbpage'));
-        $em->persist($user);
-        $em->flush();
-
-
-        $this->addFlash('info', 'Affichage du nombre d\'éléments par page bien modifié');
-        return $this->redirectToRoute('b2_titres', ['page' => 1, 'order' => $request->get('order'), 'sens' => $request->get('sens')]);
     }
 
     #[Route('/B2/titres_json', name: 'b2_json')]
     public function view_json(TitreRepository $titreRepository) :Response
     {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         $titres = $titreRepository->findWithTraitement(1, 'montant', 'ASC');
         $json = json_encode($titres);
         $str_json = (str_replace("\\", "", $json));
@@ -85,8 +92,40 @@ class B2Controller extends AbstractController
             'message' => 'Non Autorisé'
         ], 403);
 
-
         return $this->json(['message' => 'Chargement Réussi', 'titres' => $titres], 200);
+
+    }
+
+    #[Route('B2/observation/{reference}', name: 'b2_obs_json')]
+    public function addObsJson(Request $request): Response
+    {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+        $traitement = new Traitements();
+        $form = $this->createForm(TraitementFormType::class, $traitement);
+        $form->handleRequest($request);
+
+
+    }
+
+    #[Route('/B2/titre_json/{reference}', name: 'b2_titre_json')]
+    public function titre_json(TitreRepository $titreRepository, Request $request) :Response
+    {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+        $reference = $request->get('reference');
+        $titre = $titreRepository->findOneJson($reference);
+
+        $json = json_encode($titre);
+        $str_json = (str_replace("\\", "", $json));
+
+
+        $user = $this->getUser();
+        if(!$user) return $this->json([
+            'code' => 403,
+            'titre' => $titre
+        ], 403);
+
+        //return $titre;
+        return $this->json(['data' => $titre], 200);
 
     }
 
@@ -136,6 +175,7 @@ class B2Controller extends AbstractController
     #[Route('/B2/extractions', name: 'b2_extractions')]
     public function extractions(ExtractionsRepository $extractionsRepository): Response
     {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         return $this->render('B2/extract_list.html.twig', [
           'extractions' => $extractionsRepository->findby([],
               ['import_at' => 'desc'])
@@ -145,6 +185,7 @@ class B2Controller extends AbstractController
     #[Route('B2/purge', name: 'b2_purge')]
     public function purge(ExtractionsRepository $extractionsRepository, TitreRepository $titreRepository, EntityManagerInterface $em): Response
     {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         $lastExtraction = $extractionsRepository->findOneBy([], ['import_at' => 'desc']);
         $titres = $titreRepository->findBy(['is_rapproche' => false]);
         $nbRapproche = 0;
@@ -179,6 +220,7 @@ class B2Controller extends AbstractController
     #[Route('/B2/upload', name: 'b2_upload')]
     public function csvImport(Request $request, FileUploader $file_uploader, EntityManagerInterface $em, UhRepository $uhRepository)
     {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         $form = $this->createForm(FileUploadType::class);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid())
@@ -264,6 +306,7 @@ class B2Controller extends AbstractController
                             TitreRepository $titreRepository, ObservationsRepository $observationsRepository,
                             UserInterface $user)
     {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         $file_name = $request->get('file') . '.csv';
         $directory = $file_uploader->getTargetDirectory();
         $full_path = $directory.'/'.$file_name;
@@ -374,6 +417,7 @@ class B2Controller extends AbstractController
                             TitreRepository $titreRepository, ObservationsRepository $observationsRepository,
                             UserInterface $user)
     {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         // On récupère le fichier
         $file_name = $request->get('file') . '.csv';
         $directory = $file_uploader->getTargetDirectory();

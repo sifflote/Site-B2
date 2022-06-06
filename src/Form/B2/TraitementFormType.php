@@ -33,7 +33,8 @@ class TraitementFormType extends AbstractType
                 }
             ])
             ->add('precisions', TextareaType::class, [
-                'label' => "Précision:"
+                'label' => "Précision:",
+                'required' => false
                 ]
             )
             ->add('save', SubmitType::class)

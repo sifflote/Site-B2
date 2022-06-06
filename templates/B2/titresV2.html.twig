@@ -3,90 +3,111 @@
 {% block title %}Liste des Titres en rejets B2{% endblock %}
 
 {% block body %}
-
 {% include "_partials/_b2.html.twig" %}
 
     <main class="container">
-        <section class="row">
-
-            <h2><a href="{{ path('b2_titres') }}" class="link-primary">All</a> - <a href="" class="scroll">Dernier titre vue</a></h2>
-            <table class="table"
-                   data-toggle="table"
-                   data-search="true"
-                   data-show-columns="true"
-                   data-pagination="true"
-                   data-sortable="true">
-                <thead>
-                    <tr class="tr-class1">
-                        <th data-field="type" data-sortable="true">Type</th>
-                        <th data-field="iep" data-sortable="true">IEP</th>
-                        <th data-field="ipp" data-sortable="true">IPP</th>
-                        <th data-field="montant" data-sortable="true">montant</th>
-                        <th data-field="titre" data-sortable="true">Titre</th>
-                        <th data-field="enter_at" data-sortable="true">Entrée</th>
-                        <th data-field="exit_at" data-sortable="true">Sortie</th>
-                        <th data-field="name" data-sortable="true">Nom</th>
-                        <th data-field="rprs" data-sortable="true">RPRS</th>
-                        <th data-field="observation" data-sortable="true">Observation</th>
+        <section class="row mt-1">
+            {% include'B2/_titre_modal.html.twig' %}
+            <table id="table_id" class="display table table-striped table-bordered table-hover">
+                    <thead>
+                    <tr>
+                        <th scope="col" class="text-nowrap">
+                                    #
+                        </th>
+                        <th scope="col" class="text-nowrap">
+                                    Type
+                        </th>
+                        <th scope="col" class="text-nowrap">
+                                    IEP
+                        </th>
+                        <th scope="col" class="text-nowrap">
+                                    IPP
+                        </th>
+                        <th scope="col" class="text-nowrap">
+                                    Montant
+                        </th>
+                        <th scope="col" class="text-nowrap">
+                            Enc.
+                        </th>
+                        <th scope="col" class="text-nowrap">
+                                    Titre - Lot
+                        </th>
+                        <th scope="col" class="text-nowrap">
+                                    Entrée
+                        </th>
+                        <th scope="col" class="text-nowrap">
+                                    Sortie
+                        </th>
+                        <th scope="col" class="text-nowrap">
+                                    Nom
+                        </th>
+                        <th scope="col" class="text-nowrap">
+                                    RPRS
+                        </th>
+                        <th scope="col-2" class="text-nowrap">
+                            Observation
+                        </th>
                     </tr>
-                </thead>
-                <tbody>
-
-                {% for titre in titres %}
-                    <div class="jumptarget" id="{{ titre.reference }}"></div>
-                <tr id="tr-id-{{ titre.reference }}" class="tr-class-{{ titre.reference }}" data-title="bootstrap table" data-object='{"key": "value"}'>
-                    <td id="td-id-{{ titre.reference }}" class="td-class-{{ titre.reference }}">
-                        {{ titre.type }}
-                    </td>
-                    <td>
-                        {{ titre.iep }}
-                    </td>
-                    <td>
-                        {{ titre.ipp }}
-                    </td>
-                    <td class="text-end">
-                        {{ titre.montant|format_currency('EUR', locale='fr') }}
-                    </td>
-                    <td>
-                        <a href="{{ path('b2_titre_details', {ref: titre.reference }) }}" class="link-dark ">{{ titre.reference }}</a>
-                    </td>
-                    <td>
-                        {{ titre.enter_at }}
-                    </td>
-                    <td>
-                        {{ titre.exit_at }}
-                    </td>
-                    <td>
-                        {{ titre.name }}
-                    </td>
-                    <td>
-                        {{ titre.rprs }}
-                    </td>
-                    <td>
-
-                    </td>
-                </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                    {% for titre in titres2 %}
+                        <tr id="titre-{{ titre.reference }}">
+                            <td><a href="{{ path('b2_titre_details', {ref: titre.reference }) }}" class="link-success" style="cursor: help;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
+                                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                        <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+                                    </svg>
+                                </a></td>
+                            <td>{{ titre.type }}<div class="jumptarget" id="{{ titre.reference }}"></div></td>
+                            <th scope="row">{{ titre.iep }}</th>
+                            <td>{{ titre.ipp }}</td>
+                            <td class="text-end nowrap">{{ titre.montant|number_format(2) }} €</td>
+                            <td class="text-end nowrap">{{ titre.encaissement|number_format(2) }} €</td>
+                            <td class="text-end"><figure><blockquote class=""><a data-id="{{ titre.reference }}"  data-path="{{path('b2_titre_json', {reference: titre.reference}) }}" class="titreModal link-dark" style="cursor: pointer;">{{ titre.reference }}</a></blockquote><figcaption class="blockquote-footer">{{ titre.lot }}</figcaption></figure>
+                            </td>
+                            <td>{{ titre.enterAt|date("d/m/Y") }}</td>
+                            <td>{{ titre.exitAt|date("d/m/Y") }}</td>
+                            <td class="nowrap"><figure><blockquote class="">{{ titre.name }}</blockquote><figcaption class="blockquote-footer">{{ titre.payeur }}</figcaption></figure></td>
+                            <th scope="row">{% if titre.rprs == 1 %}<div class="text-success">RPRS</div>{% else %}{% endif %}</th>
+                            <td>
+                                {% for ttt in titre.traitements %}
+                                    {% if loop.last %}
+                                        <a data-id="{{ titre.reference }}"  data-path="{{path('b2_titre_json', {reference: titre.reference}) }}" class="titreModal link-dark">
+                                            <button type="button" class="btn-sm btn-{{ ttt.observation.bgcolor }} text-{{ ttt.observation.color }}" data-toggle="tooltip" data-html="true" title="{{ ttt.precisions }}  {{ ttt.user.username }}, le {{ ttt.traiteAt|date('d/m/Y') }}">
+                                                {{ ttt.observation.name }}{% if ttt.precisions is not empty %} <i class="fa-solid fa-eye"></i>{% endif %}
+                                            </button>
+                                        </a>
+                                    {% endif %}
+                                {% endfor %}
+                                {% if titre.traitements is empty %}
+                                    <a data-id="{{ titre.reference }}"  data-path="{{path('b2_titre_json', {reference: titre.reference}) }}" class="titreModal link-dark">
+                                        <button type="button" class="btn-sm btn-outline-danger text-danger" data-toggle="tooltip" data-html="true" title="">
+                                            NON TRAITE / NOUVEAU
+                                        </button>
+                                    </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
         </section>
     </main>
+
 {% endblock %}
 {% block javascripts %}
     {{ parent() }}
+    {{ encore_entry_script_tags('rejets') }}
+    {{ encore_entry_script_tags('datatable') }}
     <script type="text/javascript">
     if(window.location.hash) {
         const hash = window.location.hash.substring(1);
-        var t = 'tr-id-' + hash
+        var t = 'titre-'+ hash
         function onload() {
             document.getElementById(t).className = " table-info";
         }
         window.onload = onload;
         // hash found
     }
-
-    $('#table').bootstrapTable({
-        locale: 'fr-FR'
-    })
     </script>
 {% endblock %}

@@ -6,7 +6,8 @@
 {% include "_partials/_b2.html.twig" %}
 
     <main class="container">
-        <section class="row">
+        <section class="row mt-1">
+            <!--
             <div class="d-flex align-items-center mt-3 mb-0 pb-0">
                 <div class="col-auto">
                     <label class="visually-hidden" for="autoSizingInputGroup">Recherche</label>
@@ -272,6 +273,80 @@
                     </li>
                 </ul>
             </nav>
+-->
+            <table id="table_id" class="display table table-striped table-bordered table-hover">
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th scope="col" class="text-nowrap">
+                                    Type
+                        </th>
+                        <th scope="col" class="text-nowrap">
+                                    IEP
+                        </th>
+                        <th scope="col" class="text-nowrap">
+                                    IPP
+                        </th>
+                        <th scope="col" class="text-nowrap">
+                                    Montant
+                        </th>
+                        <th scope="col" class="text-nowrap">
+                                    Titre - Lot
+                        </th>
+                        <th scope="col" class="text-nowrap">
+                                    Entrée
+                        </th>
+                        <th scope="col" class="text-nowrap">
+                                    Sortie
+                        </th>
+                        <th scope="col" class="text-nowrap">
+                                    Nom
+                        </th>
+                        <th scope="col" class="text-nowrap">
+                                    RPRS
+                        </th>
+                        <th scope="col-2" class="text-nowrap">
+                            Observation
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% set count = 0 %}
+                    {% for titre in titres2 %}
+                        {% set count = count + 1 %}
+                        <tr id="titre-{{ titre.reference }}">
+                            <td>{{ count + (page * limit) - limit }}</td>
+                            <td>{{ titre.type }}<div class="jumptarget" id="{{ titre.reference }}"></div></td>
+                            <th scope="row">{{ titre.iep }}</th>
+                            <td>{{ titre.ipp }}</td>
+                            <td class="text-end"><figure><blockquote class="">{{ titre.montant|format_currency('EUR', locale='fr') }}</blockquote><figcaption class="blockquote-footer">{{ titre.encaissement|format_currency('EUR', locale='fr') }}</figcaption></figure></td>
+                            <td class="text-end"><figure><blockquote class=""><a href="{{ path('b2_titre_details', {ref: titre.reference }) }}" class="link-dark ">{{ titre.reference }}</a></blockquote><figcaption class="blockquote-footer">{{ titre.lot }}</figcaption></figure></td>
+                            <td>{{ titre.enterAt|date("d/m/Y") }}</td>
+                            <td>{{ titre.exitAt|date("d/m/Y") }}</td>
+                            <td><figure><blockquote class="">{{ titre.name }}</blockquote><figcaption class="blockquote-footer">{{ titre.payeur }}</figcaption></figure></td>
+                            <th scope="row">{% if titre.rprs == 1 %}<div class="text-success"><i class="fa-solid fa-toggle-on"></i></div>{% else %}<i class="fa-solid fa-toggle-off"></i>{% endif %}</th>
+                            <td>
+                                {% for ttt in titre.traitements %}
+                                    {% if loop.last %}
+                                        <a href="{{ path('b2_titre_details', {ref: titre.reference }) }}" class="link-dark">
+                                            <button type="button" class="btn-sm btn-{{ ttt.observation.bgcolor }} text-{{ ttt.observation.color }}" data-toggle="tooltip" data-html="true" title="{{ ttt.precisions }}  {{ ttt.user.username }}, le {{ ttt.traiteAt|date('d/m/Y') }}">
+                                                {{ ttt.observation.name }}{% if ttt.precisions is not empty %} <i class="fa-solid fa-eye"></i>{% endif %}
+                                            </button>
+                                        </a>
+                                    {% endif %}
+                                {% endfor %}
+                                {% if titre.traitements is empty %}
+                                    <a href="{{ path('b2_titre_details', {ref: titre.reference }) }}" class="link-dark">
+                                        <button type="button" class="btn-sm btn-outline-danger text-danger" data-toggle="tooltip" data-html="true" title="">
+                                            NON TRAITE / NOUVEAU
+                                        </button>
+                                    </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
         </section>
     </main>
 
@@ -279,6 +354,8 @@
 {% block javascripts %}
     {{ parent() }}
     {{ encore_entry_script_tags('rejets') }}
+
+    {{ encore_entry_script_tags('datatable') }}
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script type="text/javascript">
     if(window.location.hash) {
@@ -290,5 +367,6 @@
         window.onload = onload;
         // hash found
     }
+
     </script>
 {% endblock %}

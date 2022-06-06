@@ -72,7 +72,7 @@ class TitreRepository extends ServiceEntityRepository
      *
      * @throws \Doctrine\DBAL\Exception
      */
-    public function findWithTraitement($rapproche, $order, $sens)
+    public function findWithTraitement($rapproche)
     {
         $entityManager = $this->getEntityManager();
         $sql = "    SELECT
@@ -87,12 +87,43 @@ class TitreRepository extends ServiceEntityRepository
                     ORDER BY traite_at DESC
                     LIMIT 1
                     )
-                    AND c.is_rapproche = ?
-                    ORDER BY '.$order.' '.$sens.'";
+                    AND c.is_rapproche = ?";
         $query = $entityManager->getConnection()->prepare($sql);
         $query->bindValue(1, $rapproche);
 
         $result = $query->executeQuery()->fetchAllAssociative();
+
+        return $result;
+    }
+
+    public function findOneJson($reference)
+    {
+        $entityManager = $this->getEntityManager();
+        $sql = "    SELECT
+                     c.*,
+                     p.*,
+                     o.name AS observation, o.color, o.bgcolor,
+                     u.*,
+                     us.username
+                    FROM
+                    b2_titre c
+                    INNER JOIN b2_traitements p ON c.id = p.titre_id
+                    INNER JOIN b2_observations o ON p.observation_id = o.id
+                    INNER JOIN b2_uh u ON c.uh_id = u.id
+                    INNER JOIN users us ON p.user_id = us.id
+                    WHERE p.id =(
+                    SELECT p2.id
+                    FROM b2_traitements p2
+                    WHERE p.titre_id = p2.titre_id
+                    ORDER BY traite_at DESC
+                    LIMIT 1
+                    )
+                    AND c.reference = ?                    
+                    ORDER BY p.traite_at DESC LIMIT 1";
+        $query = $entityManager->getConnection()->prepare($sql);
+        $query->bindValue(1, $reference);
+
+        $result = $query->executeQuery()->fetchAssociative();
 
         return $result;
     }

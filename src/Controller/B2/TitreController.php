@@ -26,6 +26,7 @@ class TitreController extends AbstractController
                             TraitementsRepository $traitementsRepository,
                             EntityManagerInterface $em): Response
     {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         $titre = $titreRepository->findOneBy([
             'reference' => $request->get('ref')
         ]);
