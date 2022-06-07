@@ -7,13 +7,13 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 
-#[Route('/profil', name: 'profile_')]
+#[Route('/utilisateur', name: 'profile_')]
 class ProfileController extends AbstractController
 {
     #[Route('/', name: 'index')]
-    public function index(): Response
+    public function edit(): Response
     {
-        return $this->render('profile/index.html.twig', [
+        return $this->render('user/edit.html.twig', [
             'controller_name' => 'ProfileController',
         ]);
     }

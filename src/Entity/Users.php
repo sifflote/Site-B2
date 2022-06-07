@@ -5,39 +5,44 @@ namespace App\Entity;
 use App\Entity\B2\RejetsParametres;
 use App\Entity\B2\Traitements;
 use App\Entity\Commerce\Orders;
-use App\Entity\Trait\CreatedAtTrait;
 use App\Repository\UsersRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use phpDocumentor\Reflection\Types\Boolean;
-use phpDocumentor\Reflection\Types\Integer;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UsersRepository::class)]
-#[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]
+#[ORM\EntityListeners(['App\EntityListener\UsersListener'])]
+#[UniqueEntity(fields: ['email'], message: 'Cet e-mail est déjà utilisé.')]
 class Users implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    use CreatedAtTrait;
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
-    private $id;
+    private ?int $id;
 
     #[ORM\Column(type: 'string', length: 180, unique: true)]
-    private $email;
+    #[Assert\Email()]
+    #[Assert\Length(min: 2, max :180)]
+    private ?string $email;
 
     #[ORM\Column(type: 'json')]
-    private $roles = [];
+    #[Assert\NotNull()]
+    private array $roles = [];
+
+    private ?string $plainpassword = null;
 
     #[ORM\Column(type: 'string', nullable: true)]
-    private $password;
+    private ?string $password;
 
-    #[ORM\Column(type: 'string', length: 100)]
-    private $username;
+    #[ORM\Column(type: 'string', length: 50)]
+    #[Assert\NotBlank()]
+    #[Assert\Length(min: 2, max :50)]
+    private ?string $username;
 
     #[ORM\Column(type: 'string', length: 50, nullable: true)]
     private $google_id;
@@ -48,19 +53,20 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string', length: 100, nullable: true)]
     private $resetToken;
 
+    #[ORM\Column(type: 'datetime_immutable')]
+    #[Assert\NotNull()]
+    private \DateTimeImmutable $createdAt;
+
     #[ORM\OneToMany(mappedBy: 'users', targetEntity: Orders::class)]
     private $orders;
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Traitements::class)]
     private $b2_traitements;
 
-    #[ORM\Column(type: 'integer', options: ["default" => 500])]
-    private $B2LimitPage = 500;
-
     public function __construct()
     {
         $this->orders = new ArrayCollection();
-        $this->created_at = new \DateTimeImmutable();
+        $this->createdAt = new \DateTimeImmutable();
         $this->b2_traitements = new ArrayCollection();
     }
 
@@ -241,17 +247,20 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getB2LimitPage(): ?int
+    /**
+     * @return string|null
+     */
+    public function getPlainpassword(): ?string
     {
-        return $this->B2LimitPage;
+        return $this->plainpassword;
     }
 
-    public function setB2LimitPage(int $B2LimitPage): self
+    /**
+     * @param string|null $plainpassword
+     */
+    public function setPlainpassword(?string $plainpassword): void
     {
-        $this->B2LimitPage = $B2LimitPage;
-
-        return $this;
+        $this->plainpassword = $plainpassword;
     }
-
 
 }

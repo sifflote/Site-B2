@@ -13,7 +13,7 @@ class ProductsController extends AbstractController
     #[Route('/', name: 'index')]
     public function index(): Response
     {
-        return $this->render('commerce/products/index.html.twig', [
+        return $this->render('commerce/products/edit.html.twig', [
             'controller_name' => 'ProductsController',
         ]);
     }

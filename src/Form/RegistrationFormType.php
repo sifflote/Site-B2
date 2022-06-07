@@ -7,6 +7,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -21,9 +22,15 @@ class RegistrationFormType extends AbstractType
         $builder
             ->add('username', TextType::class, [
                 'attr' => [
-                    'class' => 'form-control'
+                    'class' => 'form-control',
+                    'minlenght' => 2,
+                    'maxlenght' => 50
                 ],
-                'label' => 'Pseudonyme'
+                'label' => 'Pseudonyme',
+                'constraints' => [
+                    new NotBlank(),
+                    new Length(['min' => 2, 'max' => 50])
+                ]
             ])
             ->add('email', EmailType::class, [
                 'attr' => [
@@ -40,13 +47,17 @@ class RegistrationFormType extends AbstractType
                 ],
                 'label' => 'ok with RGPD'
             ])
-            ->add('plainPassword', PasswordType::class, [
+            ->add('plainPassword', RepeatedType::class, [
                 // instead of being set onto the object directly,
                 // this is read and encoded in the controller
-                'mapped' => false,
-                'attr' => ['autocomplete' => 'new-password',
-                    'class' => 'form-control'],
-                'label' => 'Mot de passe',
+                'type' => PasswordType::class,
+                'first_options' => [
+                  'label' => 'Mot de passe'
+                ],
+                'second_options' => [
+                    'label' => 'Confirmation du mot de passe'
+                ],
+                'invalid_message' => 'Les mots de passe ne correspondent pas.',
                 'constraints' => [
                     new NotBlank([
                         'message' => 'Please enter a password',
