@@ -24,7 +24,7 @@ class AppFixtures extends Fixture
         $admin->setEmail('siffli13@gmail.com');
         $admin->setUsername('admin');
         $admin->setPassword(
-            $this->passwordHasher->hashPassword($admin, 'admin')
+            $this->passwordHasher->hashPassword($admin, 'password')
         );
         $admin->setRoles(['ROLE_USER', 'ROLE_ADMIN']);
         $manager->persist($admin);
@@ -141,6 +141,11 @@ class AppFixtures extends Fixture
             ],
             20 => [
                 'name' => 'TNJP',
+                'color' => '',
+                'bgcolor' => ''
+            ],
+            21 => [
+                'name' => 'DATE DE NAISSANCE DIF',
                 'color' => '',
                 'bgcolor' => ''
             ]

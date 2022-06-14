@@ -4,6 +4,8 @@ namespace App\Form;
 
 use App\Entity\Users;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -27,6 +29,17 @@ class UsersType extends AbstractType
                     new NotBlank(),
                     new Length(['min' => 2, 'max' => 50])
                 ]
+            ])
+            ->add('plainpassword', PasswordType::class, [
+                'label' => 'Mot de passe',
+                'label_attr' => [
+                    'form-label mt-4'
+                    ]
+            ])
+            ->add('Valider', SubmitType::class, [
+                'attr' => [
+                    'classe' => 'btn btn-primary mt-4'
+                    ]
             ])
         ;
     }

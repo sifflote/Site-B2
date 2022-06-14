@@ -14,14 +14,9 @@
                     <a class="nav-link dropdown-toggle{% if 'b2' in current_path %} active{% endif %}" href="#" id="dropdown01" data-bs-toggle="dropdown" aria-expanded="false">Rejets B2</a>
                     <ul class="dropdown-menu" aria-labelledby="dropdown01">
                         <li><a class="dropdown-item{% if 'b2_titres' in current_path %} active{%  endif %}" href="{{ path('b2_titres') }}">Liste de rejets</a></li>
+                        <li><a class="dropdown-item{% if 'b2_extractions' in current_path %} active{%  endif %}" href="{{ path('b2_extractions') }}">Statistiques</a></li>
                         <li><a class="dropdown-item{% if 'b2_extractions' in current_path %} active{%  endif %}" href="{{ path('b2_extractions') }}">Extractions</a></li>
                     </ul>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Profile</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Switch account</a>
                 </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-bs-toggle="dropdown" aria-expanded="false">Settings</a>
@@ -34,8 +29,15 @@
             </ul>
             <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                 {% if app.user %}
+                    {%  if 'ROLE_ADMIN' in app.user.roles %}
                     <li class="nav-item">
-                        <a href="{{ path('profile_index') }}" class="nav-link"><i class="fa-solid fa-user"></i></a>
+                        <a href="{{ path('admin') }}" class="nav-link"><i class="fa-solid fa-screwdriver-wrench"></i></a>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item">
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ path('profile_index') }}" class="nav-link"><i class="fa-solid fa-user"></i> {{ app.user.username }}</a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ path('app_logout') }}" class="nav-link"><i class="fa-solid fa-power-off"></i></a>

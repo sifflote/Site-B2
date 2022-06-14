@@ -1,14 +1,11 @@
-<div class="nav-scroller bg-body shadow-sm">
+<div class="nav bg-body shadow-sm">
     <nav class="nav nav-underline" aria-label="Secondary navigation">
-        <a class="nav-link active" aria-current="page" href="#">Rejets B2</a>
+        <a class="nav-link active" aria-current="page" href="{{ path('b2_titres') }}">Rejets B2</a>
         <a class="nav-link" href="#">
 
             <span class="badge bg-light text-dark rounded-pill align-text-bottom">{% for titre in titres2 %}{%  if loop.first %}{{ loop.length }}{% endif %}{% endfor %}</span>
         </a>
-        <a class="nav-link" href="{{ path('b2_extractions') }}">Extractions</a>
-        <a class="nav-link" href="#">FS<span class="badge bg-light text-dark rounded-pill align-text-bottom"></span></a>
-        <a class="nav-link" href="#">TE</a>
-        <a class="nav-link" href="#">ME</a>
+
         <a class="nav-link" href="#">Link</a>
         <a class="nav-link" href="#">Link</a>
         <a class="nav-link" href="#">Link</a>

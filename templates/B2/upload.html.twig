@@ -13,6 +13,15 @@
                     {{ form_errors(form.upload_file) }}
                 </div>
                 <div class="form-group">
+                    <label for="range" class="form-label">Nombre de ligne par fichier</label>
+                    <input type="range" class="form-control-range" min="100" max="1000" step="50" id="range" name="range" value="250" onInput="$('#rangeVal').html($(this).val())">
+                    <span id="rangeVal">200<!-- Valeur par défaut --></span>
+                </div>
+                <div class="form-group">
+                    <label for="startDate">Start</label>
+                    <input id="startDate" name="extractionDate" type="datetime-local" />
+                </div>
+                <div class="form-group">
                     {{ form_widget(form.send, {'label': "Upload this file", 'attr' : { 'class': 'btn btn-primary' }}) }}
                 </div>
                 {{ form_rest(form) }}

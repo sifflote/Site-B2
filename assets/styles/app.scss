@@ -1,6 +1,9 @@
 @import "custom";
+@import "customcolor";
 @import "~bootstrap/scss/bootstrap";
 @import "~bootstrap-table/dist/bootstrap-table.min.css";
 @import "~gridjs/dist/theme/mermaid.min.css";
 @import "datatables.net-bs5";
 @import "datatables.net-bs5/css/dataTables.bootstrap5.min.css";
+@import "select2/dist/css/select2.min.css";
+@import "node_modules/select2-bootstrap-5-theme/src/select2-bootstrap-5-theme";

@@ -1,11 +1,11 @@
 $(document).ready( function () {
     $('#table_id').DataTable({
-        order: [[3, 'desc']],
+        order: [[4, 'desc']],
         lengthMenu: [
             [100, 500, 1000 ,2000, -1],
             [100, 500, 1000 ,2000, 'Totalité'],
         ],
-        pageLength: 1000,
+        pageLength: -1,
         language: {
             paginate: {
                 previous: "Précédente",
@@ -114,5 +114,13 @@ $(document).ready( function () {
                 console.log(r.data.rprs);
             }
         });
+    });
+});
+
+$(document).ready(function(){
+    $('.dropdown-submenu a.test').on("click", function(e){
+        $(this).next('ul').toggle();
+        e.stopPropagation();
+        e.preventDefault();
     });
 });

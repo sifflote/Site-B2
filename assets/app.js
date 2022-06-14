@@ -23,4 +23,7 @@ import 'bootstrap-table';
 
 //const dt = require('datatables.net')();
 const dt = require('datatables.net');
-import 'datatables.net-bs5/js/dataTables.bootstrap5.min'
+import 'datatables.net-bs5/js/dataTables.bootstrap5.min';
+
+
+import 'select2';

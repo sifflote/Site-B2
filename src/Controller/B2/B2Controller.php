@@ -14,12 +14,11 @@ use App\Repository\B2\ObservationsRepository;
 use App\Repository\B2\TitreRepository;
 use App\Repository\B2\TraitementsRepository;
 use App\Repository\B2\UhRepository;
-use App\Repository\UsersRepository;
 use App\Service\FileUploader;
 use Doctrine\ORM\EntityManagerInterface;
 use DateTimeImmutable;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -29,18 +28,106 @@ use Symfony\Component\Serializer\SerializerInterface;
 
 class B2Controller extends AbstractController
 {
-    public function __construct(private JsonResponseFactory $jsonResponseFactory)
-    {
-    }
 
-    #[Route('/B2/titres', name: 'b2_titres')]
+
+    #[Route('/B2/titres',
+        name: 'b2_titres')]
+    #[IsGranted('ROLE_USER')]
     public function titres(TitreRepository $titreRepository,
                            ObservationsRepository $observationsRepository,
+                           UhRepository $uhRepository,
                            EntityManagerInterface $em,
                            Request $request): Response
     {
-        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
-        $titres2 = $titreRepository->findBy(['is_rapproche' => 0]);
+
+
+        // affichage des débiteurs
+        $debiteursListe = $titreRepository->createQueryBuilder('c')
+            ->select('c.name')
+            ->groupBy('c.name')
+            ->orderBy('c.name', 'ASC')
+            ->getQuery()
+            ->getResult();
+        // affichage des descriptions
+        $descriptionsListe = $titreRepository->createQueryBuilder('c')
+            ->select('c.desc_rejet, c.code_rejet')
+            ->groupBy('c.desc_rejet')
+            ->orderBy('c.desc_rejet', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        // affichage des descriptions
+        $designationsListe = $titreRepository->createQueryBuilder('c')
+            ->select('c.designation')
+            ->groupBy('c.designation')
+            ->orderBy('c.designation', 'ASC')
+            ->getQuery()
+            ->getResult();
+        // Affichage des UH
+        $UhsListe = $uhRepository->createQueryBuilder('c')
+            ->select('c.numero, c.designation, c.antenne')
+            ->groupBy('c.numero')
+            ->orderBy('c.numero', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+
+        // On vérifie si un type de filtre est appelé
+        $typeRequest = $request->get('typeFilter');
+        $namesRequest = $request->get('debiteurs');
+        $descriptionsRequest = $request->get('descriptions');
+        $designationsRequest = $request->get('designations');
+        $UhsRequest = $request->get('uhs');
+        // filtres par débiteurs
+
+        if($namesRequest){
+            $classeFilter = [];
+                foreach($namesRequest as $nameRequest){
+                    switch($nameRequest) {
+                        case 'zr':
+                            $classeFilter[] = 'zr';
+                            $namesRequest = \array_diff($namesRequest, ['zr']);
+                            break;
+                        case 'zs':
+                            $classeFilter[] = 'zs';
+                            $namesRequest = \array_diff($namesRequest, ['zs']);
+                            break;
+                        case 'zx':
+                            $classeFilter[] = 'zx';
+                            $namesRequest = \array_diff($namesRequest, ['zx']);
+                            break;
+                        case 'zm':
+                            $classeFilter[] = 'zm';
+                            $namesRequest = \array_diff($namesRequest, ['zm']);
+                            break;
+                    }
+                }
+        }
+        if(empty($namesRequest)){$namesRequest = null;}
+
+        dump($request->get('filterForm'));
+
+        if(isset($namesRequest)){
+            if(isset($dataFilter)) {
+                $titres2 = $titreRepository->createQueryBuilder('t')
+                            ->where('t.is_rapproche = 0')
+                            ->andWhere("t.name IN (:nameRequest) OR t.classe IN (:data)")
+                            ->setParameter('nameRequest', $namesRequest)
+                            ->setParameter('data', $classeFilter)
+                            ->getQuery()
+                            ->getResult();
+            }else{
+                $titres2 = $titreRepository->findBy(['is_rapproche' => 0, 'name' => $namesRequest]);
+            }
+
+        }
+        else{
+            $titres2 = $titreRepository->findBy(['is_rapproche' => 0]);
+
+        }//Fin filtre débiteurs
+
+
+        // Modal Traitement
         $observations = $observationsRepository->findBy([], ['name' => 'ASC']);
 
         $traitement = new Traitements();
@@ -70,14 +157,21 @@ class B2Controller extends AbstractController
             $em->persist($titre);
             $em->flush();
         }
+        // Fin modal
 
+
+        dump($namesRequest, $descriptionsRequest);
         return $this->renderForm('B2/titresV2.html.twig', [
             'titres2' => $titres2,
             'observations' => $observations,
-            'form' => $form
+            'form' => $form,
+            'debiteurs' => $debiteursListe,
+            'descriptions' => $descriptionsListe,
+            'designations' => $designationsListe,
+            'uhs' => $UhsListe
         ]);
     }
-
+/*
     #[Route('/B2/titres_json', name: 'b2_json')]
     public function view_json(TitreRepository $titreRepository) :Response
     {
@@ -106,7 +200,7 @@ class B2Controller extends AbstractController
 
 
     }
-
+*/
     #[Route('/B2/titre_json/{reference}', name: 'b2_titre_json')]
     public function titre_json(TitreRepository $titreRepository, Request $request) :Response
     {
@@ -128,49 +222,6 @@ class B2Controller extends AbstractController
         return $this->json(['data' => $titre], 200);
 
     }
-
-    /**
-     * @param Request $request
-     * @param TitreRepository $titreRepository
-     * @return Response
-     * pour classer par colonne
-     */
-    #[Route('/B2/by/{value}/{order}', name:'b2_by')]
-    public function show_by(Request $request, TitreRepository $titreRepository): Response
-    {
-        $value = $request->get('value');
-        $order = $request->get('order');
-        return $this->render('B2/titres.html.twig', [
-            'titres' => $titreRepository->findby([],
-                [   $value => $order,
-                    'is_rapproche' => 0
-                ]
-            ),
-            'value' => $value,
-            'order' => $order
-
-        ]);
-    }
-
-    /**
-     * @param Request $request
-     * @param TitreRepository $titreRepository
-     * @return Response
-     * Pour chercher plusieurs tous les dossiers par données
-     */
-    #[Route('/B2/titres/{filter}/{value}', name:'b2_group')]
-    public function show_filter(Request $request, TitreRepository $titreRepository): Response
-    {
-        $filter = $request->get('filter');
-        return $this->render('B2/titres.html.twig', [
-            'titres' => $titreRepository->findBy([
-                $filter => $request->get('value'),
-                'is_rapproche' => 0
-            ],
-                ['montant' => 'desc'])
-        ]);
-    }
-
 
     #[Route('/B2/extractions', name: 'b2_extractions')]
     public function extractions(ExtractionsRepository $extractionsRepository): Response
@@ -223,6 +274,11 @@ class B2Controller extends AbstractController
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         $form = $this->createForm(FileUploadType::class);
         $form->handleRequest($request);
+        $range = (int)$request->request->get('range');
+        $extractionDate = $request->request->get('extractionDate');
+        $outputDate = date('Y-m-d H:i:s', strtotime($extractionDate));
+        $output2 = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s',$outputDate);
+
         if ($form->isSubmitted() && $form->isValid())
         {
             $file = $form['upload_file']->getData();
@@ -235,7 +291,8 @@ class B2Controller extends AbstractController
                     $full_path = $directory.'/'.$file_name;
 
                     $outputFile = 'part-' . $file_name;
-                    $splitSize = 400;
+                    //$splitSize = 400;
+                    $splitSize = $range;
                     $in = fopen($full_path, 'r');
 
                     $count_row = 0;
@@ -269,7 +326,8 @@ class B2Controller extends AbstractController
                     $extraction = New Extractions();
                     $extraction->setName($file_name);
                     $now  = new DateTimeImmutable();
-                    $extraction->setImportAt($now);
+                    //$extraction->setImportAt($now);
+                    $extraction->setImportAt($output2);
                     $extraction->setFiles($fileCount);
                     $extraction->setVerify(0);
                     $extraction->setVerify2(0);
