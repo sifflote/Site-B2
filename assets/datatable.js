@@ -1,6 +1,6 @@
 $(document).ready( function () {
     $('#table_id').DataTable({
-        order: [[4, 'desc']],
+        order: [3, 'desc'],
         lengthMenu: [
             [100, 500, 1000 ,2000, -1],
             [100, 500, 1000 ,2000, 'Totalité'],

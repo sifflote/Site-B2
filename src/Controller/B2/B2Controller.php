@@ -72,16 +72,21 @@ class B2Controller extends AbstractController
             ->getResult();
 
 
-        // On vérifie si un type de filtre est appelé
-        $typeRequest = $request->get('typeFilter');
-        $namesRequest = $request->get('debiteurs');
-        $descriptionsRequest = $request->get('descriptions');
-        $designationsRequest = $request->get('designations');
-        $UhsRequest = $request->get('uhs');
-        // filtres par débiteurs
-
-        if($namesRequest){
-            $classeFilter = [];
+        if($request->isMethod('POST')){
+            // On vérifie si un type de filtre est appelé
+            $typesSelect = null;
+            if(!empty($request->get('typesSelect'))){
+                $typesSelect = explode('_|_',$request->get('typesSelect'));
+            }
+            $typesRequest = ($typesSelect != null ? $typesSelect : $request->get('types'));
+            //$typesRequest = $request->get('types');
+            $namesRequest = $request->get('debiteurs');
+            $descriptionsRequest = $request->get('descriptions');
+            $designationsRequest = $request->get('designations');
+            $UhsRequest = $request->get('uhs');
+            dump($typesSelect, $typesRequest, $namesRequest, $descriptionsRequest, $designationsRequest, $UhsRequest);
+            if($namesRequest){
+                $classeFilter = [];
                 foreach($namesRequest as $nameRequest){
                     switch($nameRequest) {
                         case 'zr':
@@ -102,30 +107,46 @@ class B2Controller extends AbstractController
                             break;
                     }
                 }
-        }
-        if(empty($namesRequest)){$namesRequest = null;}
-
-        dump($request->get('filterForm'));
-
-        if(isset($namesRequest)){
-            if(isset($dataFilter)) {
-                $titres2 = $titreRepository->createQueryBuilder('t')
-                            ->where('t.is_rapproche = 0')
-                            ->andWhere("t.name IN (:nameRequest) OR t.classe IN (:data)")
-                            ->setParameter('nameRequest', $namesRequest)
-                            ->setParameter('data', $classeFilter)
-                            ->getQuery()
-                            ->getResult();
-            }else{
-                $titres2 = $titreRepository->findBy(['is_rapproche' => 0, 'name' => $namesRequest]);
             }
+            if(empty($namesRequest)){$namesRequest = null;}
+
+            $qb = $titreRepository->createQueryBuilder('t')
+                ->select('t')
+                ->where('t.is_rapproche = 0');
+            if(isset($typesRequest)) {
+                $qb->andWhere("t.type IN (:typeRequest)"); }
+            if(isset($nameRequest)) {
+                $qb->andWhere("t.name IN (:nameRequest) OR t.classe IN (:classe)"); }
+            if(isset($descriptionsRequest)) {
+                $qb->andWhere("t.desc_rejet IN (:descriptionRequest)"); }
+            if(isset($designationsRequest)) {
+                $qb->andWhere("t.designation IN (:designationRequest)"); }
+            if(isset($UhsRequest)) {
+                $qb->andWhere("t.uh IN (:uhRequest)"); }
+
+
+            if(isset($typesRequest)) {
+                $qb->setParameter('typeRequest', $typesRequest); }
+            if(isset($nameRequest)) {
+                $qb->setParameter('nameRequest', $nameRequest)
+                        ->setParameter('classe', $classeFilter); }
+            if(isset($descriptionsRequest)) {
+                $qb->setParameter('descriptionRequest', $descriptionsRequest); }
+            if(isset($designationsRequest)) {
+                $qb->setParameter('designationRequest', $designationsRequest); }
+            if(isset($UhsRequest)) {
+                $qb->setParameter('uhRequest', $UhsRequest); }
+
+                $qb->orderBy('t.montant' , 'DESC');
+            $titres2 = $qb->getQuery()
+                ->getResult();
 
         }
-        else{
-            $titres2 = $titreRepository->findBy(['is_rapproche' => 0]);
+        else
+        {
+            $titres2 = $titreRepository->findBy(['is_rapproche' => 0], ['montant' => 'DESC']);
 
         }//Fin filtre débiteurs
-
 
         // Modal Traitement
         $observations = $observationsRepository->findBy([], ['name' => 'ASC']);
@@ -159,8 +180,6 @@ class B2Controller extends AbstractController
         }
         // Fin modal
 
-
-        dump($namesRequest, $descriptionsRequest);
         return $this->renderForm('B2/titresV2.html.twig', [
             'titres2' => $titres2,
             'observations' => $observations,
@@ -168,7 +187,13 @@ class B2Controller extends AbstractController
             'debiteurs' => $debiteursListe,
             'descriptions' => $descriptionsListe,
             'designations' => $designationsListe,
-            'uhs' => $UhsListe
+            'uhs' => $UhsListe,
+            'typesSelect' => ($typesRequest ?? ''),
+            'debiteursSelect' => ($nameRequest ?? ''),
+            'descriptionsSelect' => ($descriptionsRequest ?? ''),
+            'designationsSelect' => ($designationsRequestRequest ?? ''),
+            'uhsSelect' => ($UhsRequest ?? ''),
+
         ]);
     }
 /*
@@ -204,7 +229,7 @@ class B2Controller extends AbstractController
     #[Route('/B2/titre_json/{reference}', name: 'b2_titre_json')]
     public function titre_json(TitreRepository $titreRepository, Request $request) :Response
     {
-        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+        //$this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         $reference = $request->get('reference');
         $titre = $titreRepository->findOneJson($reference);
 

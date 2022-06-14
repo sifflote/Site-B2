@@ -5,7 +5,6 @@
 
 {% block body %}
 {% include "_partials/_b2.html.twig" %}
-
     <main class="container-xxl">
         <section class="row mt-1">
             {% include'B2/_titre_modal.html.twig' %}
@@ -14,7 +13,7 @@
                     <form method="post" name="filterForm" action="{{ path('b2_titres') }}">
                         <div class="input-group">
                             <label for="typeFilter">
-                                <select class="select2 form-select-sm " name="types[]" multiple="multiple" id="typeFilter">
+                                <select class="select2 form-select-sm " style="width:60px" name="types[]" multiple="multiple" id="typeFilter">
                                     <option value="FS">FS</option>
                                     <option value="FJ">FJ</option>
                                     <option value="ME">ME</option>
@@ -45,8 +44,10 @@
                             </label>
                             <label for="desigFilter">
                                 <select class="select2 form-select-sm " name="designations[]" multiple="multiple" id="desigFilter">
-                                    {% for d in designations %}
-                                        <option>{{ d.designation }}</option>
+                                    {% for desig in designations %}
+                                        {% if desig.designation is not empty %}
+                                        <option>{{ desig.designation }}</option>
+                                        {% endif %}
                                     {% endfor %}
                                 </select>
                             </label>
@@ -175,26 +176,31 @@
     }
 
     $(document).ready(function() {
+        var typesSelect = ["{{ typesSelect | join('","') | raw }}"];
         $('#typeFilter').select2({
-            placeholder: 'Type',
+            placeholder: 'Type...',
             theme: 'bootstrap-5'
-        });
+        }).val(typesSelect).trigger('change');
         $('#debFilter').select2({
-            placeholder: 'Débiteurs...',
-            theme: 'bootstrap-5'
-        });
+            placeholder: 'Par Débiteurs...',
+            theme: 'bootstrap-5',
+            allowClear: true
+        }).val('{{ debiteursSelect|join(', ') }}').trigger('change');
         $('#descFilter').select2({
-            placeholder: 'Description...',
-            theme: 'bootstrap-5'
-        });
+            placeholder: 'Par Description...',
+            theme: 'bootstrap-5',
+            allowClear: true
+        }).val('{{ descriptionsSelect|join(', ') }}').trigger('change');
         $('#desigFilter').select2({
-            placeholder: 'Désignation...',
-            theme: 'bootstrap-5'
-        });
+            placeholder: 'Par Désignation...',
+            theme: 'bootstrap-5',
+            allowClear: true
+        }).val('{{ designationsSelect|join(', ') }}').trigger('change');
         $('#uhFilter').select2({
-            placeholder: 'UH...',
-            theme: 'bootstrap-5'
-        });
+            placeholder: 'Par UH...',
+            theme: 'bootstrap-5',
+            allowClear: true
+        }).val('{{ uhsSelect|join(', ') }}').trigger('change');
     });
     </script>
 {% endblock %}
