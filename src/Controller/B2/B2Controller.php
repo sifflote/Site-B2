@@ -5,8 +5,6 @@ use App\Entity\B2\Extractions;
 use App\Entity\B2\Titre;
 use App\Entity\B2\Traitements;
 use App\Entity\B2\Uh;
-use App\Entity\Users;
-use App\Factory\JsonResponseFactory;
 use App\Form\B2\TraitementFormType;
 use App\Form\FileUploadType;
 use App\Repository\B2\ExtractionsRepository;
@@ -23,7 +21,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Serializer\SerializerInterface;
 
 
 class B2Controller extends AbstractController
@@ -44,6 +41,7 @@ class B2Controller extends AbstractController
         // affichage des débiteurs
         $debiteursListe = $titreRepository->createQueryBuilder('c')
             ->select('c.name')
+            ->where('c.is_rapproche = 0')
             ->groupBy('c.name')
             ->orderBy('c.name', 'ASC')
             ->getQuery()
@@ -51,6 +49,7 @@ class B2Controller extends AbstractController
         // affichage des descriptions
         $descriptionsListe = $titreRepository->createQueryBuilder('c')
             ->select('c.desc_rejet, c.code_rejet')
+            ->where('c.is_rapproche = 0')
             ->groupBy('c.desc_rejet')
             ->orderBy('c.desc_rejet', 'ASC')
             ->getQuery()
@@ -59,13 +58,14 @@ class B2Controller extends AbstractController
         // affichage des descriptions
         $designationsListe = $titreRepository->createQueryBuilder('c')
             ->select('c.designation')
+            ->where('c.is_rapproche = 0')
             ->groupBy('c.designation')
             ->orderBy('c.designation', 'ASC')
             ->getQuery()
             ->getResult();
         // Affichage des UH
         $UhsListe = $uhRepository->createQueryBuilder('c')
-            ->select('c.numero, c.designation, c.antenne')
+            ->select('c.id, c.numero, c.designation, c.antenne')
             ->groupBy('c.numero')
             ->orderBy('c.numero', 'ASC')
             ->getQuery()
@@ -80,12 +80,37 @@ class B2Controller extends AbstractController
             }
             $typesRequest = ($typesSelect != null ? $typesSelect : $request->get('types'));
             //$typesRequest = $request->get('types');
-            $namesRequest = $request->get('debiteurs');
-            $descriptionsRequest = $request->get('descriptions');
-            $designationsRequest = $request->get('designations');
-            $UhsRequest = $request->get('uhs');
-            dump($typesSelect, $typesRequest, $namesRequest, $descriptionsRequest, $designationsRequest, $UhsRequest);
+
+            $debiteursSelect = null;
+            if(!empty($request->get('debiteursSelect'))){
+                $debiteursSelect = explode('_|_', $request->get('debiteursSelect'));
+            }
+            $namesRequest = ($debiteursSelect != null ? $debiteursSelect : $request->get('debiteurs'));
+            //$namesRequest = $request->get('debiteurs');
+            $descriptionsSelect = null;
+            if(!empty($request->get('descriptionsSelect'))){
+                $descriptionsSelect = explode('_|_', $request->get('descriptionsSelect'));
+            }
+            $descriptionsRequest = ($descriptionsSelect != null ? $descriptionsSelect : $request->get('descriptions'));
+            //$descriptionsRequest = $request->get('descriptions');
+
+            $designationsSelect = null;
+            if(!empty($request->get('designationsSelect'))){
+                $designationsSelect = explode('_|_', $request->get('designationsSelect'));
+            }
+            $designationsRequest = ($designationsSelect != null ? $designationsSelect : $request->get('designations'));
+            //$designationsRequest = $request->get('designations');
+
+            $uhsSelect = null;
+            if(!empty($request->get('uhsSelect'))){
+                $uhsSelect = explode('_|_', $request->get('uhsSelect'));
+            }
+            $UhsRequest = ($uhsSelect != null ? $uhsSelect : $request->get('uhs'));
+            //$UhsRequest = $request->get('uhs');
+            dump($request->get('descriptions'), $descriptionsSelect, $descriptionsRequest,$uhsSelect, $UhsRequest);
             if($namesRequest){
+                //$namesRequestRebuild = str_replace(['zr', 'zs', 'zx', 'zm'], ['Sécurité sociale', 'CSS', 'AME', 'Mutuelles'], $namesRequest);
+                $namesRequestRebuild = $namesRequest;
                 $classeFilter = [];
                 foreach($namesRequest as $nameRequest){
                     switch($nameRequest) {
@@ -111,25 +136,39 @@ class B2Controller extends AbstractController
             if(empty($namesRequest)){$namesRequest = null;}
 
             $qb = $titreRepository->createQueryBuilder('t')
-                ->select('t')
-                ->where('t.is_rapproche = 0');
+                ->select('t');
+            if(isset($UhsRequest)) {
+                $qb->innerJoin(Uh::class, 'u')
+                ->where('u.id = t.uh')
+                ->andWhere('t.is_rapproche = 0');
+            }else{
+                $qb->where('t.is_rapproche = 0');}
             if(isset($typesRequest)) {
                 $qb->andWhere("t.type IN (:typeRequest)"); }
-            if(isset($nameRequest)) {
-                $qb->andWhere("t.name IN (:nameRequest) OR t.classe IN (:classe)"); }
+            if(isset($namesRequest)) {
+                if(empty($classeFilter)){
+                    $qb->andWhere("t.name IN (:namesRequest)");
+                }else{
+                    $qb->andWhere("t.name IN (:namesRequest) OR t.classe IN (:classe)");
+                }
+            }
             if(isset($descriptionsRequest)) {
                 $qb->andWhere("t.desc_rejet IN (:descriptionRequest)"); }
             if(isset($designationsRequest)) {
                 $qb->andWhere("t.designation IN (:designationRequest)"); }
             if(isset($UhsRequest)) {
-                $qb->andWhere("t.uh IN (:uhRequest)"); }
+                $qb->andWhere("u.numero IN (:uhRequest)"); }
 
 
             if(isset($typesRequest)) {
                 $qb->setParameter('typeRequest', $typesRequest); }
-            if(isset($nameRequest)) {
-                $qb->setParameter('nameRequest', $nameRequest)
+            if(isset($namesRequest)) {
+                if(empty($classeFilter)) {
+                    $qb->setParameter('namesRequest', $namesRequest);
+                    }else{
+                    $qb->setParameter('namesRequest', $namesRequest)
                         ->setParameter('classe', $classeFilter); }
+                }
             if(isset($descriptionsRequest)) {
                 $qb->setParameter('descriptionRequest', $descriptionsRequest); }
             if(isset($designationsRequest)) {
@@ -179,7 +218,6 @@ class B2Controller extends AbstractController
             $em->flush();
         }
         // Fin modal
-
         return $this->renderForm('B2/titresV2.html.twig', [
             'titres2' => $titres2,
             'observations' => $observations,
@@ -189,9 +227,9 @@ class B2Controller extends AbstractController
             'designations' => $designationsListe,
             'uhs' => $UhsListe,
             'typesSelect' => ($typesRequest ?? ''),
-            'debiteursSelect' => ($nameRequest ?? ''),
+            'debiteursSelect' => ($namesRequestRebuild ?? ''),
             'descriptionsSelect' => ($descriptionsRequest ?? ''),
-            'designationsSelect' => ($designationsRequestRequest ?? ''),
+            'designationsSelect' => ($designationsRequest ?? ''),
             'uhsSelect' => ($UhsRequest ?? ''),
 
         ]);

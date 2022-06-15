@@ -29,6 +29,11 @@
                         {{ form_start(form) }}
                         <div class="form-check form-switch">
                             <input type="hidden" name="typesSelect" value='{{ typesSelect | join('_|_') | raw }}'>
+                            <input type="hidden" name="debiteursSelect" value='{{ debiteursSelect | join('_|_') | raw }}'>
+                            <input type="hidden" name="descriptionsSelect" value='{{ descriptionsSelect | join('_|_') | raw }}'>
+                            <input type="hidden" name="designationsSelect" value='{{ designationsSelect | join('_|_') | raw }}'>
+                            <input type="hidden" name="uhsSelect" value='{{ uhsSelect | join('_|_') | raw }}'>
+
                             <input type="hidden" name="form_ref" id="form_ref" value="">
                             <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" name="rprs">
                             <label class="form-check-label" for="flexSwitchCheckDefault">RPRS</label>

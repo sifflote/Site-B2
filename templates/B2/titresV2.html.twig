@@ -38,7 +38,9 @@
                             <label for="descFilter">
                                 <select class="select2 form-select-sm " name="descriptions[]" multiple="multiple" id="descFilter">
                                         {% for desc in descriptions %}
-                                            <option>{{ desc.desc_rejet }} - {{ desc.code_rejet }}</option>
+                                            {% if desc.desc_rejet is not empty %}
+                                            <option>{{ desc.desc_rejet }}</option>
+                                            {% endif %}
                                         {% endfor %}
                                 </select>
                             </label>
@@ -52,9 +54,9 @@
                                 </select>
                             </label>
                             <label for="uhFilter">
-                                <select class="select2 form-select-sm " name="uhs[]" multiple="multiple" id="uhFilter">
+                                <select class="select2 form-select-sm " style="width:75px" name="uhs[]" multiple="multiple" id="uhFilter">
                                     {% for uh in uhs %}
-                                        <option>{{ uh.numero }} - {{ uh.designation }} - {{ uh.antenne }}</option>
+                                        <option>{{ uh.numero }}</option>
                                     {% endfor %}
                                 </select>
                             </label>
@@ -181,26 +183,34 @@
             placeholder: 'Type...',
             theme: 'bootstrap-5'
         }).val(typesSelect).trigger('change');
+
+        var debiteursSelect = ["{{ debiteursSelect | join('","') | raw }}"];
         $('#debFilter').select2({
             placeholder: 'Par Débiteurs...',
             theme: 'bootstrap-5',
             allowClear: true
-        }).val('{{ debiteursSelect|join(', ') }}').trigger('change');
+        }).val(debiteursSelect).trigger('change');
+
+        var descriptionsSelect = ["{{ descriptionsSelect | join('","') | raw }}"];
         $('#descFilter').select2({
             placeholder: 'Par Description...',
             theme: 'bootstrap-5',
             allowClear: true
-        }).val('{{ descriptionsSelect|join(', ') }}').trigger('change');
+        }).val(descriptionsSelect).trigger('change');
+
+        var designationsSelect = ["{{ designationsSelect | join('","') | raw }}"];
         $('#desigFilter').select2({
             placeholder: 'Par Désignation...',
             theme: 'bootstrap-5',
             allowClear: true
-        }).val('{{ designationsSelect|join(', ') }}').trigger('change');
+        }).val(designationsSelect).trigger('change');
+
+        var uhsSelect = ["{{ uhsSelect | join('","') | raw }}"];
         $('#uhFilter').select2({
             placeholder: 'Par UH...',
             theme: 'bootstrap-5',
             allowClear: true
-        }).val('{{ uhsSelect|join(', ') }}').trigger('change');
+        }).val(uhsSelect).trigger('change');
     });
     </script>
 {% endblock %}
