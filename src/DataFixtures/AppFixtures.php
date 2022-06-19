@@ -22,6 +22,7 @@ class AppFixtures extends Fixture
 
         $admin = new Users();
         $admin->setEmail('siffli13@gmail.com');
+        $admin->setFullname('Administrateur');
         $admin->setUsername('admin');
         $admin->setPassword(
             $this->passwordHasher->hashPassword($admin, 'password')
@@ -36,6 +37,7 @@ class AppFixtures extends Fixture
             $user = new Users();
             $user->setEmail($faker->email);
             $user->setUsername($faker->userName);
+            $user->setFullname($faker->name);
             $user->setRoles(['ROLE_USER']);
             $user->setPlainpassword('secret');
 

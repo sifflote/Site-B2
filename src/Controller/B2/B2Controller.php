@@ -107,7 +107,6 @@ class B2Controller extends AbstractController
             }
             $UhsRequest = ($uhsSelect != null ? $uhsSelect : $request->get('uhs'));
             //$UhsRequest = $request->get('uhs');
-            dump($request->get('descriptions'), $descriptionsSelect, $descriptionsRequest,$uhsSelect, $UhsRequest);
             if($namesRequest){
                 //$namesRequestRebuild = str_replace(['zr', 'zs', 'zx', 'zm'], ['Sécurité sociale', 'CSS', 'AME', 'Mutuelles'], $namesRequest);
                 $namesRequestRebuild = $namesRequest;
@@ -234,46 +233,24 @@ class B2Controller extends AbstractController
 
         ]);
     }
-/*
-    #[Route('/B2/titres_json', name: 'b2_json')]
-    public function view_json(TitreRepository $titreRepository) :Response
-    {
-        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
-        $titres = $titreRepository->findWithTraitement(1, 'montant', 'ASC');
-        $json = json_encode($titres);
-        $str_json = (str_replace("\\", "", $json));
-
-        $user = $this->getUser();
-        if(!$user) return $this->json([
-            'code' => 403,
-            'message' => 'Non Autorisé'
-        ], 403);
-
-        return $this->json(['message' => 'Chargement Réussi', 'titres' => $titres], 200);
-
-    }
-
-    #[Route('B2/observation/{reference}', name: 'b2_obs_json')]
-    public function addObsJson(Request $request): Response
-    {
-        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
-        $traitement = new Traitements();
-        $form = $this->createForm(TraitementFormType::class, $traitement);
-        $form->handleRequest($request);
 
 
-    }
-*/
+    /**
+     *
+     * Affichage du titre dans la Modal
+     *
+     *
+     * @param TitreRepository $titreRepository
+     * @param Request $request
+     * @return Response
+     */
     #[Route('/B2/titre_json/{reference}', name: 'b2_titre_json')]
     public function titre_json(TitreRepository $titreRepository, Request $request) :Response
     {
         //$this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         $reference = $request->get('reference');
         $titre = $titreRepository->findOneJson($reference);
-
-        $json = json_encode($titre);
-        $str_json = (str_replace("\\", "", $json));
-
+        $historiques = $titreRepository->historiqueByTitreJson($reference);
 
         $user = $this->getUser();
         if(!$user) return $this->json([
@@ -282,7 +259,7 @@ class B2Controller extends AbstractController
         ], 403);
 
         //return $titre;
-        return $this->json(['data' => $titre], 200);
+        return $this->json(['data' => $titre, 'historiques' => $historiques], 200);
 
     }
 

@@ -24,6 +24,7 @@ Encore
     .addEntry('test', './assets/test.js')
     .addEntry('rejets', './assets/rejets.js')
     .addEntry('datatable', './assets/datatable.js')
+    .addEntry('keepConditions', './assets/dataTables.keepConditions.min.js')
 
     // enables the Symfony UX Stimulus bridge (used in assets/bootstrap.js)
     .enableStimulusBridge('./assets/controllers.json')

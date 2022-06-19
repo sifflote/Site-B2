@@ -1,0 +1,6 @@
+<nav class="nav nav-borders">
+    <a class="nav-link{% if app.request.get('_route') == 'profile_index' %} active ms-0{% endif %}" href="{{ path('profile_index', {id: app.user.id }) }}">Profil</a>
+    <a class="nav-link{% if app.request.get('_route') == 'profile_user.edit.b2' %} active ms-0{% endif %}" href="{{ path('profile_user.edit.b2', {id: app.user.id}) }}">B2</a>
+    <a class="nav-link{% if app.request.get('_route') == 'profile_user.edit.password' %} active ms-0{% endif %}" href="{{ path('profile_user.edit.password', {id: app.user.id}) }}">Sécurité</a>
+    <a class="nav-link" href="#">#</a>
+</nav>

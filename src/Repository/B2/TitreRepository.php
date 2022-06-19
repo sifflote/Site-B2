@@ -147,6 +147,31 @@ class TitreRepository extends ServiceEntityRepository
             ;
         return $query->getQuery()->getSingleScalarResult();
     }
+
+    public function historiqueByTitreJson ($reference)
+    {
+        $entityManager = $this->getEntityManager();
+        $sql = "    SELECT
+                     h.*,
+                     o.*,
+                     u.username
+                    FROM
+                    b2_titre t
+                    INNER JOIN b2_traitements h ON h.titre_id = t.id
+                    INNER JOIN b2_observations o ON  o.id = h.observation_id
+                    INNER JOIN users u ON u.id = h.user_id
+                    WHERE t.reference = ?
+                    ORDER BY h.traite_at DESC";
+        $query = $entityManager->getConnection()->prepare($sql);
+        $query->bindValue(1, $reference);
+
+        $result = $query->executeQuery()->fetchAllAssociative();
+
+        return $result;
+    }
+
+
+
     // /**
     //  * @return Titre[] Returns an array of Titre objects
     //  */

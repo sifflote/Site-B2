@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Entity\B2\Parametres;
 use App\Entity\B2\RejetsParametres;
 use App\Entity\B2\Traitements;
 use App\Entity\Commerce\Orders;
@@ -64,6 +65,12 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Traitements::class)]
     private $b2_traitements;
+
+    #[ORM\Column(type: 'integer', options: ['default' => 500])]
+    private ?int $b2RejetsPerPage;
+
+    #[ORM\Column(type: 'string', length: 100)]
+    private $Fullname;
 
     public function __construct()
     {
@@ -279,6 +286,30 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPlainpassword(?string $plainpassword): void
     {
         $this->plainpassword = $plainpassword;
+    }
+
+    public function getB2RejetsPerPage(): ?int
+    {
+        return $this->b2RejetsPerPage;
+    }
+
+    public function setB2RejetsPerPage(int $b2RejetsPerPage): self
+    {
+        $this->b2RejetsPerPage = $b2RejetsPerPage;
+
+        return $this;
+    }
+
+    public function getFullname(): ?string
+    {
+        return $this->Fullname;
+    }
+
+    public function setFullname(string $Fullname): self
+    {
+        $this->Fullname = $Fullname;
+
+        return $this;
     }
 
 }

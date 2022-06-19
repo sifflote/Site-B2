@@ -1,11 +1,12 @@
 $(document).ready( function () {
+    var perPage = $('#perPage').val()
     $('#table_id').DataTable({
         order: [3, 'desc'],
         lengthMenu: [
             [100, 500, 1000 ,2000, -1],
             [100, 500, 1000 ,2000, 'Totalité'],
         ],
-        pageLength: -1,
+        pageLength: perPage,
         language: {
             paginate: {
                 previous: "Précédente",
@@ -15,12 +16,14 @@ $(document).ready( function () {
             info : "_PAGE_ sur _PAGES_ page(s)",
             lengthMenu : "Afficher _MENU_ rejets",
             search : "Rechercher:"
-        }
+        },
+        bStateSave: true,
+        stateSave: true
     });
 });
 $(document).ready( function () {
-    //var originalModal =$('#empModal').clone();
-    $('.titreModal').click(function(){
+    $(document).on('click', '.titreModal', function (e){
+    //$('.titreModal').click(function(){
         var path = $(this).data('path');
         var titreRef = $(this).data('id');
         $.ajaxSetup ({
@@ -29,6 +32,7 @@ $(document).ready( function () {
         });
         $.ajax({
             type: 'POST',
+            keepConditions: true,
             async: true,
             url: path,
             data: { reference: titreRef },
@@ -36,7 +40,6 @@ $(document).ready( function () {
             dataType: "json",
             success: function(r){
                 //$('.modal-body').html(response);
-                console.log(r.data);
                 $('#modal-titre').removeClass();
                 $('#modal-titre').addClass("modal-title bg-"+r.data.bgcolor+" text-"+r.data.color);
                 $('#json_titre').text(r.data.type + ' - Titre n° '+r.data.reference);
@@ -109,9 +112,24 @@ $(document).ready( function () {
                 $('#traitement_form_observation option[value="'+ r.data.observation_id + '"]').prop('selected', true);
 
 
-
+                r.historiques.forEach(historique => {
+                        if(historique.precisions == null ){
+                            var precisions = '';
+                        }else{
+                            var precisions = historique.precisions;
+                        }
+                        $('#historiqueList').append("                                <li class=\"list-group-item d-flex justify-content-between lh-sm\">\n" +
+                            "                                    <div>\n" +
+                            "                                        <h6 class=\"my-0\">"+ historique.name +"</h6>\n" +
+                            "                                        <small class=\"text-muted\">"+historique.traite_at+":<br />\n" +
+                            "                                            "+ precisions +"\n" +
+                            "                                        </small>\n" +
+                            "                                    </div>\n" +
+                            "                                    <span class=\"text-muted\">"+ historique.username +"</span>\n" +
+                            "                                </li>")
+                    }
+                );
                 $('#empModal').modal('show');
-                console.log(r.data.rprs);
             }
         });
     });

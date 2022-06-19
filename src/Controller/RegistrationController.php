@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\B2\Parametres;
 use App\Entity\Users;
 use App\Form\RegistrationFormType;
 use App\Repository\UsersRepository;
@@ -69,6 +70,7 @@ class RegistrationController extends AbstractController
                     'token' => $token
                 ]
             );
+            $b2param = new Parametres();
 
             return $userAuthenticator->authenticateUser(
                 $user,
