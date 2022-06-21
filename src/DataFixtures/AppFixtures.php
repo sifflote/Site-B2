@@ -21,9 +21,10 @@ class AppFixtures extends Fixture
         $users = [];
 
         $admin = new Users();
-        $admin->setEmail('siffli13@gmail.com');
+        $admin->setEmail('admin@sifflote.fr');
         $admin->setFullname('Administrateur');
-        $admin->setUsername('admin');
+        $admin->setUsername('Admin');
+        $admin->setB2RejetsPerPage(500);
         $admin->setPassword(
             $this->passwordHasher->hashPassword($admin, 'password')
         );
@@ -38,7 +39,9 @@ class AppFixtures extends Fixture
             $user->setEmail($faker->email);
             $user->setUsername($faker->userName);
             $user->setFullname($faker->name);
+            $user->setB2RejetsPerPage(500);
             $user->setRoles(['ROLE_USER']);
+            $user->setMdpUse(true);
             $user->setPlainpassword('secret');
 
             $users[] = $user;
@@ -48,108 +51,108 @@ class AppFixtures extends Fixture
         $observations = [
             1 => [
                 'name' => 'ANNULATION / REFACTURATION',
-                'color' => '',
-                'bgcolor' => ''
+                'color' => 'light',
+                'bgcolor' => 'primary'
             ],
             2 => [
                 'name' => 'DEMANDE DE PAIEMENT MANUEL',
-                'color' => '',
-                'bgcolor' => ''
+                'color' => 'light',
+                'bgcolor' => 'success'
             ],
             3 => [
                 'name' => 'FACTURATION CORRECTE',
-                'color' => '',
-                'bgcolor' => ''
+                'color' => 'light',
+                'bgcolor' => 'rose'
             ],
             4 => [
                 'name' => 'MED ATTENTE UCD',
-                'color' => '',
-                'bgcolor' => ''
+                'color' => 'dark',
+                'bgcolor' => 'info'
             ],
             5 => [
                 'name' => 'ATTENTE DE PEC',
-                'color' => '',
-                'bgcolor' => ''
+                'color' => 'dark',
+                'bgcolor' => 'light'
             ],
             6 => [
                 'name' => 'EXTRACTION PRECEDENTE',
                 'color' => '',
-                'bgcolor' => ''
+                'bgcolor' => 'outline-danger'
             ],
             7 => [
                 'name' => 'FORCLUSION',
-                'color' => '',
-                'bgcolor' => ''
+                'color' => 'warning',
+                'bgcolor' => 'dark'
             ],
             8 => [
                 'name' => 'FPU',
-                'color' => '',
-                'bgcolor' => ''
+                'color' => 'secondary',
+                'bgcolor' => 'info'
             ],
             9 => [
                 'name' => 'NOUVEAU',
                 'color' => '',
-                'bgcolor' => ''
+                'bgcolor' => 'outline-danger'
             ],
             10 => [
                 'name' => 'PROBLEME DOSSIER',
-                'color' => '',
-                'bgcolor' => ''
+                'color' => 'danger',
+                'bgcolor' => 'warning'
             ],
             11 => [
                 'name' => 'RI FS',
-                'color' => '',
-                'bgcolor' => ''
+                'color' => 'dark',
+                'bgcolor' => 'warning'
             ],
             12 => [
                 'name' => 'RI TE',
-                'color' => '',
-                'bgcolor' => ''
+                'color' => 'secondary',
+                'bgcolor' => 'warning'
             ],
             13 => [
                 'name' => 'SOLDE',
-                'color' => '',
-                'bgcolor' => ''
+                'color' => 'primary',
+                'bgcolor' => 'info'
             ],
             14 => [
                 'name' => 'SOLDE PARTIELLEMENT',
-                'color' => '',
-                'bgcolor' => ''
+                'color' => 'secondary',
+                'bgcolor' => 'info'
             ],
             15 => [
                 'name' => 'TAUX ERRONE',
-                'color' => '',
-                'bgcolor' => ''
+                'color' => 'light',
+                'bgcolor' => 'purple'
             ],
             16 => [
                 'name' => 'DMT INCONNU',
                 'color' => '',
-                'bgcolor' => ''
+                'bgcolor' => 'outline-warning'
             ],
             17 => [
                 'name' => 'DETENU',
-                'color' => '',
-                'bgcolor' => ''
+                'color' => 'dark',
+                'bgcolor' => 'light'
             ],
             18 => [
                 'name' => 'PROBLEME ACTE',
-                'color' => '',
-                'bgcolor' => ''
+                'color' => 'dark',
+                'bgcolor' => 'warning'
             ],
             19 => [
                 'name' => 'AUTRE...',
-                'color' => '',
-                'bgcolor' => ''
+                'color' => 'dark',
+                'bgcolor' => 'outline-secondary'
             ],
             20 => [
                 'name' => 'TNJP',
-                'color' => '',
-                'bgcolor' => ''
+                'color' => 'dark',
+                'bgcolor' => 'purple'
             ],
             21 => [
                 'name' => 'DATE DE NAISSANCE DIF',
-                'color' => '',
-                'bgcolor' => ''
+                'color' => 'rose',
+                'bgcolor' => 'purple'
             ]
         ];
 

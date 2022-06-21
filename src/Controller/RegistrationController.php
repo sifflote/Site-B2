@@ -37,7 +37,7 @@ class RegistrationController extends AbstractController
                     $form->get('plainPassword')->getData()
                 )
             );
-
+            $user->setMdpUse(true);
             $entityManager->persist($user);
             $entityManager->flush();
             // do anything else you need here, like send an email
@@ -98,9 +98,10 @@ class RegistrationController extends AbstractController
             //On vérifie que l'utilisateur existe et n'a pas encore activé son compte
             if($user && !$user->getIsVerified()){
                 $user->setIsVerified(true);
+                $user->setRoles(["ROLE_USER"]);
                 $em->flush($user);
                 $this->addFlash('success', 'Utilisateur activé');
-                return $this->redirectToRoute('profile_index');
+                return $this->redirectToRoute('profile_index', ['id' => $user->getId()]);
             }
         }
         // Ici un problème se pose dans le token
@@ -120,7 +121,7 @@ class RegistrationController extends AbstractController
 
         if($user->getIsVerified()){
             $this->addFlash('warning', 'Cet utilisateur est déjà activé');
-            return $this->redirectToRoute('profile_index');
+            return $this->redirectToRoute('profile_index', ['id' => $user->getId()]);
         }
 
         // On génère le JWT de l'utilisateur
@@ -147,7 +148,7 @@ class RegistrationController extends AbstractController
             compact('user', 'token')
         );
         $this->addFlash('success', 'Email de vérification envoyé');
-        return $this->redirectToRoute('profile_index');
+        return $this->redirectToRoute('profile_index', ['id' => $user->getId()]);
     }
 
 }

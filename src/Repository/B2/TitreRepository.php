@@ -128,6 +128,7 @@ class TitreRepository extends ServiceEntityRepository
         return $result;
     }
 
+/*
     public function findByPaginated($page, $limit, $rapproche, $order, $sens)
     {
         $query = $this->createQueryBuilder('a')
@@ -147,8 +148,48 @@ class TitreRepository extends ServiceEntityRepository
             ;
         return $query->getQuery()->getSingleScalarResult();
     }
+*/
+    public function titreWithSameIep($iep, $reference)
+    {
+        $em = $this->getEntityManager();
+            $sql = "SELECT t.reference
+                    FROM b2_titre t
+                    WHERE t.iep = ?
+                    EXCEPT
+                    SELECT t.reference
+                    FROM b2_titre t
+                    WHERE t.reference = ?
+            ";
+        $query = $em->getConnection()->prepare($sql);
+        $query->bindValue(1, $iep);
+        $query->bindValue(2, $reference);
 
-    public function historiqueByTitreJson ($reference)
+        $result = $query->executeQuery()->fetchAllAssociative();
+
+        return $result;
+    }
+    public function titreWithSameIpp($ipp, $reference)
+    {
+        $em = $this->getEntityManager();
+        $sql = "SELECT t.iep
+                    FROM b2_titre t
+                    WHERE t.ipp = ?
+                    EXCEPT
+                    SELECT t.iep
+                    FROM b2_titre t
+                    WHERE t.reference = ?
+            ";
+        $query = $em->getConnection()->prepare($sql);
+        $query->bindValue(1, $ipp);
+        $query->bindValue(2, $reference);
+
+        $result = $query->executeQuery()->fetchAllAssociative();
+
+        return $result;
+    }
+
+
+    public function historiqueByTitreJson($reference)
     {
         $entityManager = $this->getEntityManager();
         $sql = "    SELECT

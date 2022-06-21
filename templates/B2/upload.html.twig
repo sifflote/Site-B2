@@ -18,8 +18,8 @@
                     <span id="rangeVal">200<!-- Valeur par défaut --></span>
                 </div>
                 <div class="form-group">
-                    <label for="startDate">Start</label>
-                    <input id="startDate" name="extractionDate" type="datetime-local" />
+                    <label for="startDate">Date de l'extraction</label>
+                    <input id="startDate" name="extractionDate" type="datetime-local" class="form-control form-control-sm" />
                 </div>
                 <div class="form-group">
                     {{ form_widget(form.send, {'label': "Upload this file", 'attr' : { 'class': 'btn btn-primary' }}) }}

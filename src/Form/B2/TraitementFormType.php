@@ -37,7 +37,7 @@ class TraitementFormType extends AbstractType
                 'required' => false
                 ]
             )
-            ->add('save', SubmitType::class)
+            ->add('Enregistrer', SubmitType::class)
         ;
     }
 

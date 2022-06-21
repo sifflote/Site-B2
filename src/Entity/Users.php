@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Entity\B2\Historique;
 use App\Entity\B2\Parametres;
 use App\Entity\B2\RejetsParametres;
 use App\Entity\B2\Traitements;
@@ -38,9 +39,9 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $plainpassword = null;
 
     #[ORM\Column(type: 'string', nullable: true)]
-    private ?string $password;
+    private ?string $password = null;
 
-    #[ORM\Column(type: 'string', length: 50)]
+    #[ORM\Column(type: 'string', length: 50, unique: true)]
     #[Assert\NotBlank()]
     #[Assert\Length(min: 2, max :50)]
     private ?string $username;
@@ -67,16 +68,26 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
     private $b2_traitements;
 
     #[ORM\Column(type: 'integer', options: ['default' => 500])]
-    private ?int $b2RejetsPerPage;
+    private ?int $b2RejetsPerPage = 500;
 
     #[ORM\Column(type: 'string', length: 100)]
     private $Fullname;
+
+    #[ORM\Column(type: 'boolean')]
+    private $googleUse = 0;
+
+    #[ORM\Column(type: 'boolean')]
+    private $mdpUse = 0;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Historique::class)]
+    private $b2Historiques;
 
     public function __construct()
     {
         $this->orders = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
         $this->b2_traitements = new ArrayCollection();
+        $this->b2Historiques = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -308,6 +319,60 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
     public function setFullname(string $Fullname): self
     {
         $this->Fullname = $Fullname;
+
+        return $this;
+    }
+
+    public function getGoogleUse(): ?bool
+    {
+        return $this->googleUse;
+    }
+
+    public function setGoogleUse(?bool $googleUse): self
+    {
+        $this->googleUse = $googleUse;
+
+        return $this;
+    }
+
+    public function getMdpUse(): ?bool
+    {
+        return $this->mdpUse;
+    }
+
+    public function setMdpUse(bool $mdpUse): self
+    {
+        $this->mdpUse = $mdpUse;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Historique>
+     */
+    public function getB2Historiques(): Collection
+    {
+        return $this->b2Historiques;
+    }
+
+    public function addB2Historique(Historique $b2Historique): self
+    {
+        if (!$this->b2Historiques->contains($b2Historique)) {
+            $this->b2Historiques[] = $b2Historique;
+            $b2Historique->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeB2Historique(Historique $b2Historique): self
+    {
+        if ($this->b2Historiques->removeElement($b2Historique)) {
+            // set the owning side to null (unless already changed)
+            if ($b2Historique->getUser() === $this) {
+                $b2Historique->setUser(null);
+            }
+        }
 
         return $this;
     }

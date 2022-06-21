@@ -39,6 +39,7 @@ $(document).ready( function () {
             cache: false,
             dataType: "json",
             success: function(r){
+                console.log(r);
                 //$('.modal-body').html(response);
                 $('#modal-titre').removeClass();
                 $('#modal-titre').addClass("modal-title bg-"+r.data.bgcolor+" text-"+r.data.color);
@@ -130,6 +131,34 @@ $(document).ready( function () {
                     }
                 );
                 $('#empModal').modal('show');
+                if(r.postit){
+                    $('#postit').removeClass('invisible').addClass('visible');
+                    const postit_at = new Date(r.postit.postitAt)
+                    $('#postit_date').text(postit_at.toLocaleDateString("fr"));
+                    $('#postit_text').text(r.postit.postit);
+                    $('#form_postit').val('')
+                    $('#form_postit').val(r.postit.postit);
+                }else{
+                    $('#postit').removeClass('visible').addClass('invisible');
+                    $('#form_postit').val('')
+                }
+                $('#sameiep').text('');
+                $('#sameipp').text('');
+                if(r.ieps){
+                    r.ieps.forEach(iep => {
+
+                        $('#sameiep').text(
+                            iep.reference
+                        )
+                    });
+                }
+                if(r.ipps) {
+                    r.ipps.forEach(ipp => {
+
+                        $('#sameipp').text(
+                            ipp.iep)
+                    });
+                }
             }
         });
     });

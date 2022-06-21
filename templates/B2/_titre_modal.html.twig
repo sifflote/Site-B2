@@ -27,14 +27,21 @@
                         <hr />
 
                         {{ form_start(form) }}
-                        <div class="form-check form-switch">
+                        <div class="mb-3 border border-secondary rounded-3 p-2">
+                            <label class="form-label" for="form_postit">Post-it IPP:</label>
+                            <input class="form-control" type="text" name="postit" id="form_postit" value="" placeholder="Infos IPP">
+                            <div id="postitHelp" class="form-text">Information pour tous les dossiers avec cet IPP</div>
+
                             <input type="hidden" name="typesSelect" value='{{ typesSelect | join('_|_') | raw }}'>
                             <input type="hidden" name="debiteursSelect" value='{{ debiteursSelect | join('_|_') | raw }}'>
                             <input type="hidden" name="descriptionsSelect" value='{{ descriptionsSelect | join('_|_') | raw }}'>
                             <input type="hidden" name="designationsSelect" value='{{ designationsSelect | join('_|_') | raw }}'>
                             <input type="hidden" name="uhsSelect" value='{{ uhsSelect | join('_|_') | raw }}'>
-
                             <input type="hidden" name="form_ref" id="form_ref" value="">
+                        </div>
+
+                        <div class="form-check form-switch">
+
                             <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" name="rprs">
                             <label class="form-check-label" for="flexSwitchCheckDefault">RPRS</label>
                         </div>
@@ -44,7 +51,9 @@
 
                         <ul class="list-group mb-3" id="historiqueList">
 
-
+                        <!--
+                        Historique ajouter via javascript
+                        -->
 
                         </ul>
                     </div>
@@ -124,6 +133,36 @@
                                 <small class="text-muted">Date de naissance / Hors format</small>
                                 <h5 class="my-0" id="naissance_text"></h5>
                             </div>
+                        </div>
+                        <hr class="my-4">
+                        <div class="row g-3">
+                            <div class="col-sm-6">
+                                <div class="invisible" id="postit">
+                                    <ul class="notes">
+                                        <li>
+                                            <div class="rotate-1 lazur-bg">
+                                                <small id="postit_date">12:03:28 12-04-2014</small>
+                                                <h4>Info IPP</h4>
+                                                <p id="postit_text"></p>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-6">
+                                <div>
+                                    <small class="text-muted">Autres Titres en rejet pour cet IEP</small>
+                                    <!-- Inclusion des titres -->
+                                    <h5 class="my-0" id="sameiep"></h5>
+                                </div>
+                                <div>
+                                    <small class="text-muted">Autres Dossier en rejet pour cet IPP</small>
+                                    <!-- Inclusion des titres -->
+                                    <h5 class="my-0" id="sameipp"></h5>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                 </div>

@@ -57,12 +57,14 @@ class UsersType extends AbstractType
                     new Email()
                 ]
             ])
+            /*
             ->add('plainpassword', PasswordType::class, [
                 'label' => 'Mot de passe requis pour modifier',
                 'label_attr' => [
                     'form-label mt-4'
                     ]
             ])
+            */
             ->add('Valider', SubmitType::class, [
                 'attr' => [
                     'classe' => 'btn btn-primary mt-4'
