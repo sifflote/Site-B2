@@ -1,0 +1,68 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Historiques des actions{% endblock %}
+
+{% block body %}
+    <main class="container-xxl">
+        <section class="row m-1 p-1">
+
+    <table id="table" class="display table table-striped table-bordered table-hover">
+        <thead>
+        <tr>
+            <th class="text-nowrap col">
+                Date
+            </th>
+            <th class="text-nowrap col">
+                Utilisateur
+            </th>
+            <th class="text-nowrap col-9">
+                Action
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for historique in historiques %}
+            <tr>
+                <td>
+                    {{ historique.dateAt|date("d/m/Y H:i") }}
+                </td>
+                <th scope="row">
+                    {{ historique.user.username }}
+                </th>
+                <td>
+                    {{ historique.context }}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </section>
+    </main>
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+<script type="text/javascript">
+    $(document).ready( function () {
+        $('#table').DataTable({
+            order: [0, 'desc'],
+            lengthMenu: [
+                [100, 500, 1000 ,2000, -1],
+                [100, 500, 1000 ,2000, 'Totalité'],
+            ],
+            pageLength: 500,
+            language: {
+                paginate: {
+                    previous: "Précédente",
+                    next: "Suivante"
+                },
+                infoFiltered: "(filtrés sur _MAX_ actions)",
+                info : "_PAGE_ sur _PAGES_ page(s)",
+                lengthMenu : "Afficher _MENU_ actions",
+                search : "Rechercher:"
+            },
+            bStateSave: true,
+            stateSave: true
+        });
+    });
+</script>
+{% endblock %}

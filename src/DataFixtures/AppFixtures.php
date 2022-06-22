@@ -28,7 +28,7 @@ class AppFixtures extends Fixture
         $admin->setPassword(
             $this->passwordHasher->hashPassword($admin, 'password')
         );
-        $admin->setRoles(['ROLE_USER', 'ROLE_ADMIN']);
+        $admin->setRoles(['ROLE_USER', 'ROLE_B2', 'ROLE_ADMIN']);
         $manager->persist($admin);
 
 

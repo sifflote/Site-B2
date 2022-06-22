@@ -70,7 +70,6 @@ class RegistrationController extends AbstractController
                     'token' => $token
                 ]
             );
-            $b2param = new Parametres();
 
             return $userAuthenticator->authenticateUser(
                 $user,
@@ -143,7 +142,7 @@ class RegistrationController extends AbstractController
         $mail->send(
             'no-reply@monsite.net',
             $user->getEmail(),
-            'Activation de votre compte sur le site e-commerce',
+            'Activation de votre compte sur le site Sifflote.fr',
             'register',
             compact('user', 'token')
         );

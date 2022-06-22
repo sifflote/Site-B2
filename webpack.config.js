@@ -21,9 +21,7 @@ Encore
      * and one CSS file (e.g. app.scss) if your JavaScript imports CSS.
      */
     .addEntry('app', './assets/app.js')
-    .addEntry('test', './assets/test.js')
-    .addEntry('rejets', './assets/rejets.js')
-    .addEntry('datatable', './assets/datatable.js')
+    .addEntry('titres', './assets/titres.js')
     .addEntry('keepConditions', './assets/dataTables.keepConditions.min.js')
 
     // enables the Symfony UX Stimulus bridge (used in assets/bootstrap.js)
