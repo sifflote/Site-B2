@@ -1,58 +1,45 @@
 <?php
+
 namespace App\Controller\B2;
 
-use App\Entity\B2\Observations;
-use App\Entity\B2\Traitements;
-use App\Form\B2\TraitementFormType;
-use App\Repository\B2\ObservationsRepository;
 use App\Repository\B2\PostitRepository;
 use App\Repository\B2\TitreRepository;
-use App\Repository\B2\TraitementsRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\User\UserInterface;
 
 class TitreController extends AbstractController
 {
     /**
      *
-     * Affichage du titre dans la Modal
-     *
+     * Affichage du titre dans la Modal     *
      *
      * @param TitreRepository $titreRepository
+     * @param PostitRepository $postitRepository
      * @param Request $request
      * @return Response
      */
     #[Route('/B2/titre_json/{reference}', name: 'b2_titre_json')]
     #[IsGranted('ROLE_USER')]
-    public function titre_json(TitreRepository $titreRepository, PostitRepository $postitRepository,Request $request) :Response
+    public function titre_json(TitreRepository $titreRepository, PostitRepository $postitRepository, Request $request): Response
     {
         //$this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         $reference = $request->get('reference');
         $titreJson = $titreRepository->findOneJson($reference);
         $historiques = $titreRepository->historiqueByTitreJson($reference);
         $titre = $titreRepository->findOneBy(['reference' => $reference]);
-        $postit =  $postitRepository->findOneBy(['ipp' => $titre->getIpp()]);
+        $postit = $postitRepository->findOneBy(['ipp' => $titre->getIpp()]);
         $titreWithSameIep = $titreRepository->titreWithSameIep($titre->getIep(), $titre->getReference());
         $titreWithSameIpp = $titreRepository->titreWithSameIpp($titre->getIpp(), $titre->getReference());
 
-
-
-
         $user = $this->getUser();
-        if(!$user) return $this->json([
+        if (!$user) return $this->json([
             'code' => 403,
             'titre' => $titreJson
         ], 403);
 
-        //return $titre;
         return $this->json(['data' => $titreJson, 'historiques' => $historiques, 'postit' => $postit, 'ieps' => $titreWithSameIep, 'ipps' => $titreWithSameIpp], 200);
 
     }

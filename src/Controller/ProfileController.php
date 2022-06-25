@@ -15,14 +15,12 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
-
 #[Route('/utilisateur', name: 'profile_')]
 class ProfileController extends AbstractController
 {
     /**
      *
      * Page d'accueil du profil
-     *
      *
      * @param Users $currentUser
      * @param Request $request
@@ -38,19 +36,17 @@ class ProfileController extends AbstractController
         $form = $this->createForm(UsersType::class, $currentUser);
 
         $form->handleRequest($request);
-        if($form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid()) {
 
-                $user = $form->getData();
-                $em->persist($currentUser);
-                $em->flush();
+            $user = $form->getData();
+            $em->persist($currentUser);
+            $em->flush();
 
-                $this->addFlash('success', 'Les informations ont bien été modifiées');
+            $this->addFlash('success', 'Les informations ont bien été modifiées');
 
-                return $this->redirectToRoute('profile_index',['id'=>$currentUser->getId()]);
+            return $this->redirectToRoute('profile_index', ['id' => $currentUser->getId()]);
 
         }
-
-
         return $this->render('user/index.html.twig', [
             'form' => $form->createView(),
         ]);
@@ -58,7 +54,6 @@ class ProfileController extends AbstractController
 
     /**
      * Modification de l'espace sécurité
-     *
      *
      * @param Users $currentUser
      * @param Request $request
@@ -68,14 +63,14 @@ class ProfileController extends AbstractController
      */
     #[Security("is_granted('ROLE_USER') and user === currentUser")]
     #[Route('/security/{id}', 'user.edit.password', methods: ['GET', 'POST'])]
-    public function editPassword(Users $currentUser, Request $request,UserPasswordHasherInterface $hasher,
-    EntityManagerInterface $em) : Response
+    public function editPassword(Users                  $currentUser, Request $request, UserPasswordHasherInterface $hasher,
+                                 EntityManagerInterface $em): Response
     {
         $form = $this->createForm(UserPasswordType::class);
 
         $form->handleRequest($request);
-        if($form->isSubmitted() && $form->isValid()){
-            if($hasher->isPasswordValid($currentUser, $form->getData()['plainPassword'])){
+        if ($form->isSubmitted() && $form->isValid()) {
+            if ($hasher->isPasswordValid($currentUser, $form->getData()['plainPassword'])) {
                 $currentUser->setPassword(
                     $hasher->hashPassword(
                         $currentUser,
@@ -89,18 +84,16 @@ class ProfileController extends AbstractController
                     'success',
                     'Le mot de passe a bien été modifié.'
                 );
-                return $this->redirectToRoute('profile_index', ['id'=>$currentUser->getId()]);
+                return $this->redirectToRoute('profile_index', ['id' => $currentUser->getId()]);
             } else {
                 $this->addFlash('warning', 'Le mot de passe renseigné est incorrect.');
             }
         }
-
         $formUse = $this->createForm(UserMDPUseFormType::class);
 
-
         $formUse->handleRequest($request);
-        if($formUse->isSubmitted() && $formUse->isValid()){
-            if(!$currentUser->getMdpUse()) {
+        if ($formUse->isSubmitted() && $formUse->isValid()) {
+            if (!$currentUser->getMdpUse()) {
                 $currentUser->setPassword(
                     $hasher->hashPassword(
                         $currentUser,
@@ -124,16 +117,19 @@ class ProfileController extends AbstractController
         ]);
     }
 
+    /**
+     * Page de paramètre B2
+     *
+     * @param Users $currentUser
+     * @return Response
+     */
     #[Security("is_granted('ROLE_USER') and user === currentUser")]
     #[Route('/edition-b2-parametre/{id}', 'user.edit.b2', methods: ['GET', 'POST'])]
-    public function editB2Parametres(Users $currentUser) : Response
+    public function editB2Parametres(Users $currentUser): Response
     {
-
         return $this->render('user/b2.html.twig', [
-
         ]);
     }
-
 
     /**
      *
@@ -146,12 +142,11 @@ class ProfileController extends AbstractController
      * @return Response
      */
     #[Security("is_granted('ROLE_USER') and user === currentUser")]
-    #[Route('/edition-b2-perpage/{id}', 'user.edit.b2.json', methods: [ 'POST'])]
-    public function b2perPage(Users $currentUser, UsersRepository $usersRepository,
-                              Request $request, EntityManagerInterface $em):Response
+    #[Route('/edition-b2-perpage/{id}', 'user.edit.b2.json', methods: ['POST'])]
+    public function b2perPage(Users   $currentUser, UsersRepository $usersRepository,
+                              Request $request, EntityManagerInterface $em): Response
     {
         $user = $this->getUser();
-
         $utilisateur = $usersRepository->find($user);
         $utilisateur->setB2RejetsPerPage($request->get('RejetPerPage'));
         $em->persist($utilisateur);

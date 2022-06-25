@@ -8,6 +8,7 @@ use App\Entity\B2\RejetsParametres;
 use App\Entity\B2\Traitements;
 use App\Entity\Commerce\Orders;
 use App\Repository\UsersRepository;
+use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -29,7 +30,7 @@ class Users implements UserInterface
 
     #[ORM\Column(type: 'string', length: 180, unique: true)]
     #[Assert\Email()]
-    #[Assert\Length(min: 2, max :180)]
+    #[Assert\Length(min: 2, max: 180)]
     private ?string $email;
 
     #[ORM\Column(type: 'json')]
@@ -43,7 +44,7 @@ class Users implements UserInterface
 
     #[ORM\Column(type: 'string', length: 50, unique: true)]
     #[Assert\NotBlank()]
-    #[Assert\Length(min: 2, max :50)]
+    #[Assert\Length(min: 2, max: 50)]
     private ?string $username;
 
     #[ORM\Column(type: 'string', length: 50, nullable: true)]
@@ -57,8 +58,7 @@ class Users implements UserInterface
 
     #[ORM\Column(type: 'datetime_immutable')]
     #[Assert\NotNull()]
-    private \DateTimeImmutable $createdAt;
-
+    private DateTimeImmutable $createdAt;
 
 
     #[ORM\OneToMany(mappedBy: 'users', targetEntity: Orders::class)]
@@ -85,7 +85,7 @@ class Users implements UserInterface
     public function __construct()
     {
         $this->orders = new ArrayCollection();
-        $this->createdAt = new \DateTimeImmutable();
+        $this->createdAt = new DateTimeImmutable();
         $this->b2_traitements = new ArrayCollection();
         $this->b2Historiques = new ArrayCollection();
     }
@@ -114,7 +114,7 @@ class Users implements UserInterface
      */
     public function getUserIdentifier(): string
     {
-        return (string) $this->email;
+        return (string)$this->email;
     }
 
     /**
@@ -184,7 +184,7 @@ class Users implements UserInterface
         return $this;
     }
 
-    public function getIsVerified(): ?Bool
+    public function getIsVerified(): ?bool
     {
         return $this->is_verified;
     }
@@ -238,17 +238,17 @@ class Users implements UserInterface
     }
 
     /**
-     * @return \DateTimeImmutable
+     * @return DateTimeImmutable
      */
-    public function getCreatedAt(): \DateTimeImmutable
+    public function getCreatedAt(): DateTimeImmutable
     {
         return $this->createdAt;
     }
 
     /**
-     * @param \DateTimeImmutable $createdAt
+     * @param DateTimeImmutable $createdAt
      */
-    public function setCreatedAt(\DateTimeImmutable $createdAt): void
+    public function setCreatedAt(DateTimeImmutable $createdAt): void
     {
         $this->createdAt = $createdAt;
     }

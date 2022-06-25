@@ -23,7 +23,12 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class HistoriquesController extends AbstractController
 {
-
+    /**
+     * Historiques des modifications
+     *
+     * @param HistoriqueRepository $historiqueRepository
+     * @return Response
+     */
     #[Route('/B2/historiques', name: 'b2_historiques')]
     #[IsGranted('ROLE_USER')]
     public function historiques(HistoriqueRepository $historiqueRepository): Response
@@ -31,12 +36,6 @@ class HistoriquesController extends AbstractController
         $historiques = $historiqueRepository->findBy([], ['dateAt' => 'DESC']);
         return $this->renderForm('B2/historiques.html.twig', [
             'historiques' => $historiques
-
-
         ]);
     }
-
-
-
-
 }
