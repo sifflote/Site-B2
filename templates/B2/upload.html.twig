@@ -17,9 +17,13 @@
                     <input type="range" class="form-control-range" min="100" max="1000" step="50" id="range" name="range" value="250" onInput="$('#rangeVal').html($(this).val())">
                     <span id="rangeVal">200<!-- Valeur par défaut --></span>
                 </div>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" name="withObs" id="flexSwitchCheckDefault">
+                    <label class="form-check-label" for="flexSwitchCheckDefault">Avec Observations</label>
+                </div>
                 <div class="form-group">
                     <label for="startDate">Date de l'extraction</label>
-                    <input id="startDate" name="extractionDate" type="datetime-local" class="form-control form-control-sm" />
+                    <input id="startDate" name="extractionDate" required type="datetime-local" class="form-control form-control-sm" />
                 </div>
                 <div class="form-group">
                     {{ form_widget(form.send, {'label': "Upload this file", 'attr' : { 'class': 'btn btn-primary' }}) }}

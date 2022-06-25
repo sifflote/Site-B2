@@ -45,6 +45,15 @@ class TraitementsRepository extends ServiceEntityRepository
         }
     }
 
+    public function deleteTraitementRapproche(array $aRapprocher){
+        return $this->createQueryBuilder('t')
+            ->delete()
+            ->where('t.titre IN (:value)')
+            ->setParameter('value', $aRapprocher, \Doctrine\DBAL\Connection::PARAM_INT_ARRAY)
+            ->getQuery()
+            ->execute();
+    }
+
     // /**
     //  * @return Traitements[] Returns an array of Traitements objects
     //  */

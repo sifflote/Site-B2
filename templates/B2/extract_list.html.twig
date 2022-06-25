@@ -10,8 +10,8 @@
 
                 <span class="badge bg-light text-dark rounded-pill align-text-bottom"></span>
             </a>
-            <a class="nav-link active" href="{{ path('b2_titres') }}">Extractions</a>
-            <a class="nav-link active link-success" href="{{ path('b2_upload') }}"><i class="fa-solid fa-file-import"></i></a>
+            <a class="nav-link active link-success" href="{{ path('b2_upload') }}"><i class="fa-solid fa-file-import"></i> Importer</a>
+            <a class="nav-link active link-success" href="{{ path('b2_purge_ttt') }}"><i class="fa-solid fa-rotate"></i> Vérifier les Observations</a>
 
         </nav>
     </div>
@@ -46,7 +46,7 @@
                     <td>{{ extraction.name }}</td>
                     <td class="text-center">{{ extraction.countLine }}</td>
                     <td class="text-center">{{ extraction.newLine }}</td>
-                    <td class="text-center">{{ extraction.countObs }}</td>
+                    <td class="text-center">{% if not extraction.withObs %}<span class="text-danger"><em>{{ extraction.countObs }}</em></span>{% else %}{{ extraction.countObs }}{% endif %}</td>
                     <td class="text-center">{{ extraction.rapproche }}</td>
                     <td class="text-center">{{ extraction.importAt|date("d/m/Y H:m:s") }}</td>
                     <td class="text-center">{% for i in range((1 + extraction.verify), extraction.files) %}

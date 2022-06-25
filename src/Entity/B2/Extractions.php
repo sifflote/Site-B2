@@ -44,6 +44,9 @@ class Extractions
     #[ORM\Column(type: 'integer')]
     private $count_obs = 0;
 
+    #[ORM\Column(type: 'boolean')]
+    private $withObs;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -165,6 +168,18 @@ class Extractions
     public function setCountObs(int $count_obs): self
     {
         $this->count_obs = $count_obs;
+
+        return $this;
+    }
+
+    public function getWithObs(): ?bool
+    {
+        return $this->withObs;
+    }
+
+    public function setWithObs(bool $withObs): self
+    {
+        $this->withObs = $withObs;
 
         return $this;
     }

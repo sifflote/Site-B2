@@ -48,9 +48,12 @@ class ExtractionController extends AbstractController
         $extractionDate = $request->request->get('extractionDate');
         $outputDate = date('Y-m-d H:i:s', strtotime($extractionDate));
         $output2 = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s',$outputDate);
+        $withObs =(boolean)$request->request->get('withObs');
+
 
         if ($form->isSubmitted() && $form->isValid())
         {
+            dump($withObs);
             $file = $form['upload_file']->getData();
             if ($file)
             {
@@ -104,6 +107,7 @@ class ExtractionController extends AbstractController
                     $extraction->setCountLine($count_row - 1);
                     $extraction->setIsPurge(0);
                     $extraction->setRapproche(0);
+                    $extraction->setWithObs($withObs);
                     $em->persist($extraction);
                     $em->flush();
 
@@ -267,32 +271,46 @@ class ExtractionController extends AbstractController
             if($i > 0){
                 // On récupère le titre existant dans la BDD
                 $titre = $titreRepository->findOneBy(['reference' => $value[11]]);
-                // Récupération de l'intitulé d'observation
-                $observation = $observationsRepository->findOneBy(['name' => $value[28]]);
+
                 //Vérifier si traitement existant
                 $traitement = $traitementsRepository->findBy(['titre' => $titre->getId()], ['traite_at' => 'DESC'], 1 ,0);
 
                 // si l'observation du fichier n'est pas vide et si il n'y a pas de traitement
                 // OU
                 // si observation est differente du traitement
-                if((!empty($observation) && (empty($traitement))) || ($traitement[0]->getObservation()->getId() !== $observation->getId())){
+                if($extraction->getWithObs()){
+                    if((!empty($observation) && (empty($traitement))) || ($traitement[0]->getObservation()->getId() !== $observation->getId())){
+                        // Récupération de l'intitulé d'observation
+                        $observation = $observationsRepository->findOneBy(['name' => $value[28]]);
+                        $ttt = new Traitements();
+                        $ttt->setTitre($titre);
+                        $ttt->setObservation($observation);
+                        $ttt->setUser($user);
+                        $ttt->setPrecisions($value[29]);
+                        if($value[30] == ""){
+                            $valeur30 = \DateTimeImmutable::createFromFormat('d/m/Y', $value[18]);
+                        }else{
+                            $valeur30 = \DateTimeImmutable::createFromFormat('d/m/Y', $value[30]);
+                        }
 
-                    $ttt = new Traitements();
-                    $ttt->setTitre($titre);
-                    $ttt->setObservation($observation);
-                    $ttt->setUser($user);
-                    $ttt->setPrecisions($value[29]);
-                    if($value[30] == ""){
-                        $valeur30 = \DateTimeImmutable::createFromFormat('d/m/Y', $value[18]);
-                    }else{
-                        $valeur30 = \DateTimeImmutable::createFromFormat('d/m/Y', $value[30]);
+                        $ttt->setTraiteAt($valeur30);
+                        $em->persist($ttt);
+                        $em->flush();
+                        $maj_obs++;
                     }
-
-                    $ttt->setTraiteAt($valeur30);
+                }elseif(empty($traitement)){
+                    $ttt = new Traitements();
+                    $newObservation = $observationsRepository->findOneBy(['name' => 'NOUVEAU']);
+                    $ttt->setTitre($titre);
+                    $ttt->setObservation($newObservation);
+                    $ttt->setUser($user);
+                    $ttt->setTraiteAt($extraction->getImportAt());
                     $em->persist($ttt);
                     $em->flush();
                     $maj_obs++;
+
                 }
+
 
             }
             $i++;
@@ -307,7 +325,7 @@ class ExtractionController extends AbstractController
 
     #[Route('B2/purge', name: 'b2_purge')]
     #[IsGranted('ROLE_USER')]
-    public function purge(ExtractionsRepository $extractionsRepository, TitreRepository $titreRepository, EntityManagerInterface $em): Response
+    public function purge(ExtractionsRepository $extractionsRepository, TraitementsRepository $traitementsRepository, TitreRepository $titreRepository, EntityManagerInterface $em): Response
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         $lastExtraction = $extractionsRepository->findOneBy([], ['import_at' => 'desc']);
@@ -332,6 +350,7 @@ class ExtractionController extends AbstractController
             ->setParameter('value', $aRapprocher, \Doctrine\DBAL\Connection::PARAM_INT_ARRAY)
             ->getQuery()
             ->execute();
+
         $lastExtraction->setIsPurge(1);
         $lastExtraction->setRapproche($nbRapproche);
         $em->persist($lastExtraction);
@@ -341,19 +360,32 @@ class ExtractionController extends AbstractController
         return $this->redirectToRoute('b2_extractions');
     }
 
+    #[Route('B2/verif_ttt', name: 'b2_purge_ttt')]
+    #[IsGranted('ROLE_USER')]
+    public function reloadTTT(TitreRepository $titreRepository, TraitementsRepository $traitementsRepository,EntityManagerInterface $em): Response
+    {
+        $titres = $titreRepository->findBy(['is_rapproche' => true]);
+        $aRapprocher = [];
+        foreach ($titres as $titre){
+            $aRapprocher[] = $titre->getId();
+        }
+        if(!empty($aRapprocher)){
+            $sql = $traitementsRepository->deleteTraitementRapproche($aRapprocher);
 
+            $em->flush();
+            $this->addFlash('info', 'Purge des '.$sql.' traitements rapprochés par annulation ou encaissement réussie');
+        }
+        return $this->redirectToRoute('b2_extractions');
+    }
 
     private function priceToFloat($s): float
     {
         // convert "," to "."
         $s = str_replace(',', '.', $s);
-
         // remove everything except numbers and dot "."
         $s = preg_replace("/[^0-9\.]/", "", $s);
-
         // remove all seperators from first part and keep the end
         $s = str_replace('.', '',substr($s, 0, -3)) . substr($s, -3);
-
         // return float
         return (float) $s;
     }
