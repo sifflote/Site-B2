@@ -68,7 +68,7 @@ class ExtractionController extends AbstractController
 
 
         if ($form->isSubmitted() && $form->isValid()) {
-            dump($withObs);
+
             $file = $form['upload_file']->getData();
             if ($file) {
                 $file_name = $file_uploader->upload($file);
@@ -170,6 +170,9 @@ class ExtractionController extends AbstractController
         }
         $extraction = $extractionsRepository->findOneBy(['name' => explode('part-', $file_name)[1]]);
         $newLine = 0;
+        // Passé tous les titres en non présent last extractions
+
+        $non_rapproche = [];
         foreach ($csv as $ligne => $value) {
             if ($i > 0) {
 
@@ -177,6 +180,7 @@ class ExtractionController extends AbstractController
                 // RPRS est un boolean si RPRS est écrit
                 $rprs = ($value[26] == 'RPRS') ? 1 : 0;
                 if (empty($verif_titre)) {
+
 
                     $titre = new Titre();
                     $titre->setType($value[0]);
@@ -221,12 +225,14 @@ class ExtractionController extends AbstractController
                     $titre->setExtractionAt($extraction->getImportAt());
                     //$titre->setMajAt($now);
                     $newLine++;
+                    $titre->setIsInLastExtraction(1);
                     $em->persist($titre);
                     $em->flush();
                 } else {
                     //si le titre est déjà présent on change la date de mise à jour
                     $verif_titre->setMajAt($extraction->getImportAt());
                     $verif_titre->setRprs($rprs);
+                    $verif_titre->setIsInLastExtraction(1);
                     $em->persist($verif_titre);
                     $em->flush();
                 }
@@ -306,13 +312,17 @@ class ExtractionController extends AbstractController
                 //Vérifier si traitement existant
                 $traitement = $traitementsRepository->findBy(['titre' => $titre->getId()], ['traite_at' => 'DESC'], 1, 0);
 
+                if($extraction->getWithObs()){
+                    $observation = $observationsRepository->findOneBy(['name' => $value[28]]);
+                }
                 // si l'observation du fichier n'est pas vide et s'il n'y a pas de traitement
                 // OU
                 // si observation est différente du traitement
+                $tttExist = ($traitement ? $traitement[0]->getObservation()->getId() : null);
                 if ($extraction->getWithObs()) {
-                    if ((!empty($observation) && (empty($traitement))) || ($traitement[0]->getObservation()->getId() !== $observation->getId())) {
+                    if ((!empty($observation) && (empty($traitement))) || ($tttExist) !== $observation->getId()) {
                         // Récupération de l'intitulé d'observation
-                        $observation = $observationsRepository->findOneBy(['name' => $value[28]]);
+
                         $ttt = new Traitements();
                         $ttt->setTitre($titre);
                         $ttt->setObservation($observation);
@@ -368,17 +378,13 @@ class ExtractionController extends AbstractController
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         $lastExtraction = $extractionsRepository->findOneBy([], ['import_at' => 'desc']);
-        $titres = $titreRepository->findBy(['is_rapproche' => false]);
+        $titres = $titreRepository->findBy(['isInLastExtraction' => false]);
         $nbRapproche = 0;
         $aRapprocher = [];
         foreach ($titres as $titre) {
             // si n'est pas (date de dernière extraction égale à date d'extraction, ou date de dernière extraction date de maj
-            if (!(($titre->getExtractionAt() == $lastExtraction->getImportAt()) || ($titre->getMajAt() == $lastExtraction->getImportAt()))) {
-
                 $nbRapproche++;
                 $aRapprocher[] = $titre->getId();
-
-            }
 
         }
         $sql = $titreRepository->createQueryBuilder('');
@@ -387,6 +393,12 @@ class ExtractionController extends AbstractController
             ->setParameter('key', 1)
             ->where('t.id IN (:value)')
             ->setParameter('value', $aRapprocher, Connection::PARAM_INT_ARRAY)
+            ->getQuery()
+            ->execute();
+        $sql2 = $titreRepository->createQueryBuilder('');
+        $sql2->update(Titre::class, 't')
+            ->set('t.isInLastExtraction', ':key')
+            ->setParameter('key', 0)
             ->getQuery()
             ->execute();
 

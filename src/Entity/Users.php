@@ -3,8 +3,6 @@
 namespace App\Entity;
 
 use App\Entity\B2\Historique;
-use App\Entity\B2\Parametres;
-use App\Entity\B2\RejetsParametres;
 use App\Entity\B2\Traitements;
 use App\Entity\Commerce\Orders;
 use App\Repository\UsersRepository;
@@ -13,14 +11,14 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface as PasswordAuthenticatedUserInterfaceAlias;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UsersRepository::class)]
 #[ORM\EntityListeners(['App\EntityListener\UsersListener'])]
 #[UniqueEntity(fields: ['email'], message: 'Cet e-mail est déjà utilisé.')]
-class Users implements UserInterface
+class Users implements UserInterface, PasswordAuthenticatedUserInterfaceAlias // Pas d'erreur ici
 {
 
     #[ORM\Id]

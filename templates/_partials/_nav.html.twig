@@ -16,7 +16,7 @@
                     <a class="nav-link dropdown-toggle{% if 'b2' in current_path %} active{% endif %}" href="#" id="dropdown01" data-bs-toggle="dropdown" aria-expanded="false">Rejets B2</a>
                     <ul class="dropdown-menu" aria-labelledby="dropdown01">
                         <li><a class="dropdown-item{% if 'b2_titres' in current_path %} active{%  endif %}" href="{{ path('b2_titres') }}">Liste de rejets</a></li>
-                        <li><a class="dropdown-item" href="#">Statistiques</a></li>
+                        <li><a class="dropdown-item{% if 'b2_statistiques' in current_path %} active{%  endif %}" href="{{ path('b2_statistiques') }}">Statistiques</a></li>
                         <li><a class="dropdown-item{% if 'b2_extractions' in current_path %} active{%  endif %}" href="{{ path('b2_extractions') }}">Extractions</a></li>
                         {% if is_granted('ROLE_ADMIN') %}
                         <li><a class="dropdown-item{% if 'b2_historiques' in current_path %} active{%  endif %}" href="{{ path('b2_historiques') }}">Historiques</a></li>

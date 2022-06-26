@@ -107,7 +107,10 @@ class Titre
     private $extraction_at;
 
     #[ORM\Column(type: 'boolean')]
-    private $is_rapproche = false;
+    private bool $is_rapproche = false;
+
+    #[ORM\Column(type: 'boolean')]
+    private $isInLastExtraction;
 
     public function __construct()
     {
@@ -518,6 +521,18 @@ class Titre
     public function setIsRapproche(bool $isRapproche): self
     {
         $this->isRapproche = $isRapproche;
+
+        return $this;
+    }
+
+    public function getIsInLastExtraction(): ?bool
+    {
+        return $this->isInLastExtraction;
+    }
+
+    public function setIsInLastExtraction(bool $isInLastExtraction): self
+    {
+        $this->isInLastExtraction = $isInLastExtraction;
 
         return $this;
     }
