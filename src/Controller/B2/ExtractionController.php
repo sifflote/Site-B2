@@ -72,8 +72,7 @@ class ExtractionController extends AbstractController
             $file = $form['upload_file']->getData();
             if ($file) {
                 $file_name = $file_uploader->upload($file);
-                if (null !== $file_name)
-                {
+                if (null !== $file_name) {
                     $directory = $file_uploader->getTargetDirectory();
                     $full_path = $directory . '/' . $file_name;
 
@@ -172,7 +171,6 @@ class ExtractionController extends AbstractController
         $newLine = 0;
         // Passé tous les titres en non présent last extractions
 
-        $non_rapproche = [];
         foreach ($csv as $ligne => $value) {
             if ($i > 0) {
 
@@ -180,7 +178,6 @@ class ExtractionController extends AbstractController
                 // RPRS est un boolean si RPRS est écrit
                 $rprs = ($value[26] == 'RPRS') ? 1 : 0;
                 if (empty($verif_titre)) {
-
 
                     $titre = new Titre();
                     $titre->setType($value[0]);
@@ -236,8 +233,6 @@ class ExtractionController extends AbstractController
                     $em->persist($verif_titre);
                     $em->flush();
                 }
-
-
             }
             $i++;
         }
@@ -312,7 +307,7 @@ class ExtractionController extends AbstractController
                 //Vérifier si traitement existant
                 $traitement = $traitementsRepository->findBy(['titre' => $titre->getId()], ['traite_at' => 'DESC'], 1, 0);
 
-                if($extraction->getWithObs()){
+                if ($extraction->getWithObs()) {
                     $observation = $observationsRepository->findOneBy(['name' => $value[28]]);
                 }
                 // si l'observation du fichier n'est pas vide et s'il n'y a pas de traitement
@@ -378,13 +373,13 @@ class ExtractionController extends AbstractController
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         $lastExtraction = $extractionsRepository->findOneBy([], ['import_at' => 'desc']);
-        $titres = $titreRepository->findBy(['isInLastExtraction' => false]);
+        $titres = $titreRepository->findBy(['isInLastExtraction' => false, 'is_rapproche' => false]);
         $nbRapproche = 0;
         $aRapprocher = [];
         foreach ($titres as $titre) {
             // si n'est pas (date de dernière extraction égale à date d'extraction, ou date de dernière extraction date de maj
-                $nbRapproche++;
-                $aRapprocher[] = $titre->getId();
+            $nbRapproche++;
+            $aRapprocher[] = $titre->getId();
 
         }
         $sql = $titreRepository->createQueryBuilder('');

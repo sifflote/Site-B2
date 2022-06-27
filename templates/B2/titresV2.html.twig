@@ -4,7 +4,7 @@
 
 
 {% block body %}
-{% include "B2/_b2.html.twig" %}
+    {% include "B2/_b2.html.twig" %}
     <main class="container-xxl">
         <section class="row mt-1">
             {% include'B2/_titre_modal.html.twig' %}
@@ -13,7 +13,8 @@
                     <form method="post" name="filterForm" action="{{ path('b2_titres') }}">
                         <div class="input-group">
                             <label for="typeFilter">
-                                <select class="select2 form-select-sm " style="width:60px" name="types[]" multiple="multiple" id="typeFilter">
+                                <select class="select2 form-select-sm " style="width:60px" name="types[]"
+                                        multiple="multiple" id="typeFilter">
                                     <option value="FS">FS</option>
                                     <option value="FJ">FJ</option>
                                     <option value="ME">ME</option>
@@ -21,7 +22,8 @@
                                 </select>
                             </label>
                             <label for="debFilter">
-                                <select class="select2 form-select-sm " name="debiteurs[]" multiple="multiple" id="debFilter">
+                                <select class="select2 form-select-sm " name="debiteurs[]" multiple="multiple"
+                                        id="debFilter">
                                     <optgroup label="Par Type">
                                         <option value="zr">Sécurité sociale</option>
                                         <option value="zs">CSS</option>
@@ -36,32 +38,36 @@
                                 </select>
                             </label>
                             <label for="descFilter">
-                                <select class="select2 form-select-sm " name="descriptions[]" multiple="multiple" id="descFilter">
-                                        {% for desc in descriptions %}
-                                            {% if desc.desc_rejet is not empty %}
+                                <select class="select2 form-select-sm " name="descriptions[]" multiple="multiple"
+                                        id="descFilter">
+                                    {% for desc in descriptions %}
+                                        {% if desc.desc_rejet is not empty %}
                                             <option>{{ desc.desc_rejet }}</option>
-                                            {% endif %}
-                                        {% endfor %}
+                                        {% endif %}
+                                    {% endfor %}
                                 </select>
                             </label>
                             <label for="desigFilter">
-                                <select class="select2 form-select-sm " name="designations[]" multiple="multiple" id="desigFilter">
+                                <select class="select2 form-select-sm " name="designations[]" multiple="multiple"
+                                        id="desigFilter">
                                     {% for desig in designations %}
                                         {% if desig.designation is not empty %}
-                                        <option>{{ desig.designation }}</option>
+                                            <option>{{ desig.designation }}</option>
                                         {% endif %}
                                     {% endfor %}
                                 </select>
                             </label>
                             <label for="uhFilter">
-                                <select class="select2 form-select-sm " style="width:75px" name="uhs[]" multiple="multiple" id="uhFilter">
+                                <select class="select2 form-select-sm " style="width:75px" name="uhs[]"
+                                        multiple="multiple" id="uhFilter">
                                     {% for uh in uhs %}
                                         <option>{{ uh.numero }}</option>
                                     {% endfor %}
                                 </select>
                             </label>
                             <button type="submit" class="btn btn-primary btn-sm">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-save" viewBox="0 0 16 16">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                     class="bi bi-save" viewBox="0 0 16 16">
                                     <path d="M2 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H9.5a1 1 0 0 0-1 1v7.293l2.646-2.647a.5.5 0 0 1 .708.708l-3.5 3.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L7.5 9.293V2a2 2 0 0 1 2-2H14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h2.5a.5.5 0 0 1 0 1H2z"/>
                                 </svg>
                             </button>
@@ -72,86 +78,109 @@
             <hr class="mt-3"/>
             <input type="hidden" name="perPage" value="{{ app.user.b2RejetsPerPage }}" id="perPage">
             <table id="table_id" class="display table table-striped table-bordered table-hover">
-                    <thead>
-                    <tr>
-                        <th scope="col-2" class="text-nowrap">
-                            Observation
-                        </th>
-                        <th scope="col" class="text-nowrap">
-                                    IEP
-                        </th>
-                        <th scope="col" class="text-nowrap">
-                                    IPP
-                        </th>
-                        <th scope="col" class="text-nowrap">
-                                    Montant
-                        </th>
-                        <th scope="col" class="text-nowrap">
-                            Enc.
-                        </th>
-                        <th scope="col" class="text-nowrap">
-                                    Titre - Lot
-                        </th>
-                        <th scope="col" class="text-nowrap">
-                                    Entrée
-                        </th>
-                        <th scope="col" class="text-nowrap">
-                                    Sortie
-                        </th>
-                        <th scope="col" class="text-nowrap">
-                                    Nom
-                        </th>
-                        <th scope="col" class="text-nowrap">
-                            Description Rejet
-                        </th>
-                        <th scope="col" class="text-nowrap">
-                            Désignation
-                        </th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for titre in titres2 %}
-                        <tr id="titre-{{ titre.reference }}">
-                            <td>
-                                {% for ttt in titre.traitements %}
-                                    {% if loop.last %}
-                                        <a data-id="{{ titre.reference }}"  data-path="{{path('b2_titre_json', {reference: titre.reference}) }}" class="titreModal link-dark">
-                                            <button type="button" class="btn-sm btn-{{ ttt.observation.bgcolor }} text-{{ ttt.observation.color }}" data-toggle="tooltip" data-html="true" title="{{ ttt.precisions }}  {{ ttt.user.username }}, le {{ ttt.traiteAt|date('d/m/Y') }}">
-                                                {{ ttt.observation.name }}{% if ttt.precisions is not empty %} <i class="fa-solid fa-eye"></i>{% endif %}
-                                            </button>
-                                        </a>
-                                    {% endif %}
-                                {% endfor %}
-                                {% if titre.traitements is empty %}
-                                    <a data-id="{{ titre.reference }}"  data-path="{{path('b2_titre_json', {reference: titre.reference}) }}" class="titreModal link-dark">
-                                        <button type="button" class="btn-sm btn-outline-danger text-danger" data-toggle="tooltip" data-html="true" title="">
-                                            NON TRAITE / NOUVEAU
+                <thead>
+                <tr>
+                    <th scope="col-2" class="text-nowrap">
+                        Observation
+                    </th>
+                    <th scope="col" class="text-nowrap">
+                        IEP
+                    </th>
+                    <th scope="col" class="text-nowrap">
+                        IPP
+                    </th>
+                    <th scope="col" class="text-nowrap">
+                        Montant
+                    </th>
+                    <th scope="col" class="text-nowrap">
+                        Enc.
+                    </th>
+                    <th scope="col" class="text-nowrap">
+                        Titre - Lot
+                    </th>
+                    <th scope="col" class="text-nowrap">
+                        Entrée
+                    </th>
+                    <th scope="col" class="text-nowrap">
+                        Sortie
+                    </th>
+                    <th scope="col" class="text-nowrap">
+                        Nom
+                    </th>
+                    <th scope="col" class="text-nowrap">
+                        Description Rejet
+                    </th>
+                    <th scope="col" class="text-nowrap">
+                        Désignation
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for titre in titres2 %}
+                    <tr id="titre-{{ titre.reference }}">
+                        <td>
+                            {% for ttt in titre.traitements %}
+                                {% if loop.last %}
+                                    <a data-id="{{ titre.reference }}"
+                                       data-path="{{ path('b2_titre_json', {reference: titre.reference}) }}"
+                                       class="titreModal link-dark">
+                                        <button type="button"
+                                                class="btn-sm btn-{{ ttt.observation.bgcolor }} text-{{ ttt.observation.color }}"
+                                                data-toggle="tooltip" data-html="true"
+                                                title="{{ ttt.precisions }}  {{ ttt.user.username }}, le {{ ttt.traiteAt|date('d/m/Y') }}">
+                                            {{ ttt.observation.name }}{% if ttt.precisions is not empty %} <i
+                                                    class="fa-solid fa-eye"></i>{% endif %}
                                         </button>
                                     </a>
                                 {% endif %}
-                            </td>
-                            <th scope="row">
-                                <figure>
-                                    <blockquote class="">{{ titre.iep }}</blockquote>{% if titre.rprs == 1 %}
-                                    <figcaption class="blockquote-footer text-success">
-                                        RPRS
-                                    </figcaption>{% endif %}
-                                </figure>
-                            </th>
-                            <td>{{ titre.ipp }}<div class="jumptarget" id="{{ titre.reference }}"></div></td>
-                            <td class="text-end nowrap">{{ titre.montant|number_format(2) }} €</td>
-                            <td class="text-end nowrap">{{ titre.encaissement|number_format(2) }} €</td>
-                            <td class="text-end"><figure><blockquote class=""><a data-id="{{ titre.reference }}"  data-path="{{path('b2_titre_json', {reference: titre.reference}) }}" class="titreModal link-dark" style="cursor: pointer;">{{ titre.reference }}</a></blockquote><figcaption class="blockquote-footer">{{ titre.lot }}</figcaption></figure>
-                            </td>
-                            <td>{{ titre.enterAt|date("d/m/Y") }}</td>
-                            <td>{{ titre.exitAt|date("d/m/Y") }}</td>
-                            <td class="nowrap"><figure><blockquote class="">{{ titre.name }}</blockquote><figcaption class="blockquote-footer">{{ titre.payeur }}</figcaption></figure></td>
-                            <td>{{ titre.descRejet }}</td>
-                            <td>{{ titre.designation }}</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
+                            {% endfor %}
+                            {% if titre.traitements is empty %}
+                                <a data-id="{{ titre.reference }}"
+                                   data-path="{{ path('b2_titre_json', {reference: titre.reference}) }}"
+                                   class="titreModal link-dark">
+                                    <button type="button" class="btn-sm btn-outline-danger text-danger"
+                                            data-toggle="tooltip" data-html="true" title="">
+                                        NON TRAITE / NOUVEAU
+                                    </button>
+                                </a>
+                            {% endif %}
+                        </td>
+                        <th scope="row">
+                            <figure>
+                                <blockquote class="">{{ titre.iep }}</blockquote>{% if titre.rprs == 1 %}
+                                <figcaption class="blockquote-footer text-success">
+                                    RPRS
+                                </figcaption>{% endif %}
+                            </figure>
+                        </th>
+                        <td>{{ titre.ipp }}
+                            <div class="jumptarget" id="{{ titre.reference }}"></div>
+                        </td>
+                        <td class="text-end nowrap">{{ titre.montant|number_format(2) }} €</td>
+                        <td class="text-end nowrap">{{ titre.encaissement|number_format(2) }} €</td>
+                        <td class="text-end">
+                            <figure>
+                                <blockquote class=""><a data-id="{{ titre.reference }}"
+                                                        data-path="{{ path('b2_titre_json', {reference: titre.reference}) }}"
+                                                        class="titreModal link-dark"
+                                                        style="cursor: pointer;">{{ titre.reference }}</a></blockquote>
+                                <figcaption class="blockquote-footer">{{ titre.lot }}</figcaption>
+                            </figure>
+                        </td>
+                        <td>{{ titre.enterAt|date("d/m/Y") }}</td>
+                        <td>{{ titre.exitAt|date("d/m/Y") }}</td>
+                        <td class="nowrap">
+                            <figure>
+                                <blockquote class="">{{ titre.name }}</blockquote>
+                                <figcaption class="blockquote-footer">{{ titre.payeur }}</figcaption>
+                            </figure>
+                        </td>
+                        <td>{{ titre.descRejet }}</td>
+                        <td>{{ titre.designation }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
         </section>
     </main>
 
@@ -161,50 +190,52 @@
     {{ encore_entry_script_tags('titres') }}
     {{ encore_entry_script_tags('keepConditions') }}
     <script type="text/javascript">
-    if(window.location.hash) {
-        const hash = window.location.hash.substring(1);
-        var t = 'titre-'+ hash
-        function onload() {
-            document.getElementById(t).className = " table-info";
+        if (window.location.hash) {
+            const hash = window.location.hash.substring(1);
+            var t = 'titre-' + hash
+
+            function onload() {
+                document.getElementById(t).className = " table-info";
+            }
+
+            window.onload = onload;
+            // hash found
         }
-        window.onload = onload;
-        // hash found
-    }
 
-    $(document).ready(function() {
-        var typesSelect = ["{{ typesSelect | join('","') | raw }}"];
-        $('#typeFilter').select2({
-            placeholder: 'Type...',
-            theme: 'bootstrap-5'
-        }).val(typesSelect).trigger('change');
+        $(document).ready(function () {
+            var typesSelect = ["{{ typesSelect | join('","') | raw }}"];
+            $('#typeFilter').select2({
+                placeholder: 'Type...',
+                theme: 'bootstrap-5'
+            }).val(typesSelect).trigger('change');
 
-        var debiteursSelect = ["{{ debiteursSelect | join('","') | raw }}"];
-        $('#debFilter').select2({
-            placeholder: 'Par Débiteurs...',
-            theme: 'bootstrap-5',
-            allowClear: true
-        }).val(debiteursSelect).trigger('change');
+            var debiteursSelect = ["{{ debiteursSelect | join('","') | raw }}"];
+            $('#debFilter').select2({
+                placeholder: 'Par Débiteurs...',
+                theme: 'bootstrap-5',
+                allowClear: true
+            }).val(debiteursSelect).trigger('change');
 
-        var descriptionsSelect = ["{{ descriptionsSelect | join('","') | raw }}"];
-        $('#descFilter').select2({
-            placeholder: 'Par Description...',
-            theme: 'bootstrap-5',
-            allowClear: true
-        }).val(descriptionsSelect).trigger('change');
+            var descriptionsSelect = ["{{ descriptionsSelect | join('","') | raw }}"];
+            $('#descFilter').select2({
+                placeholder: 'Par Description...',
+                theme: 'bootstrap-5',
+                allowClear: true
+            }).val(descriptionsSelect).trigger('change');
 
-        var designationsSelect = ["{{ designationsSelect | join('","') | raw }}"];
-        $('#desigFilter').select2({
-            placeholder: 'Par Désignation...',
-            theme: 'bootstrap-5',
-            allowClear: true
-        }).val(designationsSelect).trigger('change');
+            var designationsSelect = ["{{ designationsSelect | join('","') | raw }}"];
+            $('#desigFilter').select2({
+                placeholder: 'Par Désignation...',
+                theme: 'bootstrap-5',
+                allowClear: true
+            }).val(designationsSelect).trigger('change');
 
-        var uhsSelect = ["{{ uhsSelect | join('","') | raw }}"];
-        $('#uhFilter').select2({
-            placeholder: 'Par UH...',
-            theme: 'bootstrap-5',
-            allowClear: true
-        }).val(uhsSelect).trigger('change');
-    });
+            var uhsSelect = ["{{ uhsSelect | join('","') | raw }}"];
+            $('#uhFilter').select2({
+                placeholder: 'Par UH...',
+                theme: 'bootstrap-5',
+                allowClear: true
+            }).val(uhsSelect).trigger('change');
+        });
     </script>
 {% endblock %}
