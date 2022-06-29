@@ -4,7 +4,6 @@ namespace App\Entity;
 
 use App\Entity\B2\Historique;
 use App\Entity\B2\Traitements;
-use App\Entity\Commerce\Orders;
 use App\Repository\UsersRepository;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -57,10 +56,6 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterfaceAlias //
     #[ORM\Column(type: 'datetime_immutable')]
     #[Assert\NotNull()]
     private DateTimeImmutable $createdAt;
-
-
-    #[ORM\OneToMany(mappedBy: 'users', targetEntity: Orders::class)]
-    private $orders;
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Traitements::class)]
     private $b2_traitements;
@@ -202,36 +197,6 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterfaceAlias //
     public function setResetToken($resetToken): self
     {
         $this->resetToken = $resetToken;
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Orders>
-     */
-    public function getOrders(): Collection
-    {
-        return $this->orders;
-    }
-
-    public function addOrder(Orders $order): self
-    {
-        if (!$this->orders->contains($order)) {
-            $this->orders[] = $order;
-            $order->setUsers($this);
-        }
-
-        return $this;
-    }
-
-    public function removeOrder(Orders $order): self
-    {
-        if ($this->orders->removeElement($order)) {
-            // set the owning side to null (unless already changed)
-            if ($order->getUsers() === $this) {
-                $order->setUsers(null);
-            }
-        }
-
         return $this;
     }
 

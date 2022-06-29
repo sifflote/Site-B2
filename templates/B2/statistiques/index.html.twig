@@ -21,15 +21,47 @@
                     {% for key, value in global %}
                     <tr class="{% if key =='Total' %} table-info{% endif %}">
                         <th scope="row">{{ key }}</th>
-                        <td>{{ value.countItem }}</td>
-                        <td>{{ value.sumItem|format_currency('EUR', locale='fr') }}</td>
+                        <td class="text-end">{{ value.countItem }}</td>
+                        <td class="text-end">{{ value.sumItem|format_currency('EUR', locale='fr') }}</td>
                     </tr>
                     {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="col">
+                <h5>Par observations</h5>
+                <table class="table table-bordered table-striped">
+                    <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        {% for type in typeList %}
+                        <th scope="col" colspan="2" class="text-center">{{ type }}</th>
+                        {% endfor %}
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for key, value in observations %}
+                        <tr class="">
+                            <th scope="row">{{ key }}</th>
+                            {% for array, data in value %}
+                            <td class="text-end">{{ data.countItem }}</td>
+                            <td class="text-end">{{ data.sumItem|format_currency('EUR', locale='fr') }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                    <tfoot>
+                    <tr class="table-info">
+                        <th scope="col">Total</th>
+                        {% for key, value in global %}
+                        <td class="text-end">{{ value.countItem }}</td>
+                        <td class="text-end">{{ value.sumItem|format_currency('EUR', locale='fr') }}</td>
+                        {% endfor %}
+                    </tr>
+                    </tfoot>
                     </tbody>
                 </table>
             </div>
         </div>
     </main>
 </div>
-
 {% endblock %}

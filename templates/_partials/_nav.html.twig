@@ -7,11 +7,6 @@
 
         <div class="navbar-collapse collapse" id="navbars">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                {% if is_granted('ROLE_ADMIN') %}
-                <li class="nav-item">
-                    <a class="nav-link{% if 'commerce' in current_path %} active{% endif %}" aria-current="page" href="{{ path('commerce_index') }}">Test commerce</a>
-                </li>
-                {% endif %}
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle{% if 'b2' in current_path %} active{% endif %}" href="#" id="dropdown01" data-bs-toggle="dropdown" aria-expanded="false">Rejets B2</a>
                     <ul class="dropdown-menu" aria-labelledby="dropdown01">

@@ -211,7 +211,57 @@ class TitreRepository extends ServiceEntityRepository
         return $result;
     }
 
+    public function countSumByObs($rapproche, $observation, $type = null)
+    {
+        $entityManager = $this->getEntityManager();
+        if($type && $type !== 'Total'){
+            $sql = "    SELECT COUNT(t.id) AS countItem,
+                    SUM(t.montant) AS sumItem,
+                    o.name AS observation
+                    FROM b2_titre t
+                    LEFT JOIN b2_traitements ttt
+                    ON ttt.titre_id = t.id
+                    LEFT JOIN b2_observations o
+                    ON o.id = ttt.observation_id
+                    WHERE ttt.id = (
+                    SELECT ttt2.id
+                    FROM b2_traitements ttt2
+                    WHERE ttt.titre_id = ttt2.titre_id
+                    ORDER BY traite_at DESC LIMIT 1
+                    )
+                    AND t.is_rapproche = ? 
+                    AND o.name = ?
+                    AND t.type = ?";
+        }else{
+            $sql = "    SELECT COUNT(t.id) AS countItem,
+                    SUM(t.montant) AS sumItem,
+                    o.name AS observation
+                    FROM b2_titre t
+                    LEFT JOIN b2_traitements ttt
+                    ON ttt.titre_id = t.id
+                    LEFT JOIN b2_observations o
+                    ON o.id = ttt.observation_id
+                    WHERE ttt.id = (
+                    SELECT ttt2.id
+                    FROM b2_traitements ttt2
+                    WHERE ttt.titre_id = ttt2.titre_id
+                    ORDER BY traite_at DESC LIMIT 1
+                    )
+                    AND t.is_rapproche = ? 
+                    AND o.name = ?";
+        }
 
+        $query = $entityManager->getConnection()->prepare($sql);
+        $query->bindValue(1, $rapproche);
+        $query->bindValue(2, $observation);
+        if($type && $type !== 'Total'){
+            $query->bindValue(3, $type);
+        }
+
+        $result = $query->executeQuery()->fetchAssociative();
+
+        return $result;
+    }
 
     // /**
     //  * @return Titre[] Returns an array of Titre objects

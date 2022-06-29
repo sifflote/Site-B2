@@ -25,12 +25,13 @@ class AppFixtures extends Fixture
         $admin->setFullname('Administrateur');
         $admin->setUsername('Admin');
         $admin->setB2RejetsPerPage(500);
+        $admin->setIsVerified(1);
+        $admin->setMdpUse(1);
         $admin->setPassword(
             $this->passwordHasher->hashPassword($admin, 'password')
         );
         $admin->setRoles(['ROLE_USER', 'ROLE_B2', 'ROLE_ADMIN']);
         $manager->persist($admin);
-
 
         $faker = Faker\Factory::create('fr_FR');
 
@@ -164,7 +165,6 @@ class AppFixtures extends Fixture
 
             $manager->persist($obs);
         }
-
         $manager->flush();
     }
 }
