@@ -417,9 +417,15 @@ class ExtractionController extends AbstractController
      */
     #[Route('B2/verif_ttt', name: 'b2_purge_ttt')]
     #[IsGranted('ROLE_USER')]
-    public function reloadTTT(TitreRepository $titreRepository, TraitementsRepository $traitementsRepository, EntityManagerInterface $em): Response
+    public function reloadTTT(ExtractionsRepository  $extractionsRepository,
+                              TitreRepository        $titreRepository,
+                              TraitementsRepository  $traitementsRepository,
+                              ObservationsRepository $observationsRepository,
+                              EntityManagerInterface $em): Response
     {
         $titres = $titreRepository->findBy(['is_rapproche' => true]);
+
+        // Supprimer les traitements des titres rapprochés
         $aRapprocher = [];
         foreach ($titres as $titre) {
             $aRapprocher[] = $titre->getId();
@@ -430,6 +436,29 @@ class ExtractionController extends AbstractController
             $em->flush();
             $this->addFlash('info', 'Purge des ' . $sql . ' traitements rapprochés par annulation ou encaissement réussie');
         }
+
+        // Passer en extraction précédente les titre ne provenant pas de la dernière extraction
+        $lastExtraction = $extractionsRepository->findOneBy([], ['import_at' => 'DESC']);
+        $idNouveau = $observationsRepository->findOneBy(['name' => 'EXTRACTION PRECEDENTE'])->getId();
+        $titresExtractionPrecedente = $titreRepository->findWithTraitementExtractionAtRapproche(0, $lastExtraction->getImportAt()->format('Y-m-d H:i:s'), 'NOUVEAU');
+        $i = 0;
+        foreach ($titresExtractionPrecedente as $aModifier) {
+            $listAModifier[] = $traitementsRepository->findOneBy(['titre' => $aModifier['id']], ['traite_at' => 'DESC'])->getId();
+            $i++;
+        }
+        if ($i > 0) {
+            $sql = $traitementsRepository->createQueryBuilder('');
+            $sql->update(Traitements::class, 't')
+                ->set('t.observation', ':key')
+                ->setParameter('key', $idNouveau)
+                ->where('t.id IN (:value)')
+                ->setParameter('value', $listAModifier, Connection::PARAM_INT_ARRAY)
+                ->getQuery()
+                ->execute();
+        }
+        $em->flush();
+        $this->addFlash('info', 'Passage de  ' . $i . ' traitements "Nouveau" en "Extraction précédente.');
+
         return $this->redirectToRoute('b2_extractions');
     }
 }

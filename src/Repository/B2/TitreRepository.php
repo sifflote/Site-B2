@@ -4,12 +4,9 @@ namespace App\Repository\B2;
 
 use App\Entity\B2\Titre;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\DBAL\Types\Type;
+use Doctrine\DBAL\Exception;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
-use Doctrine\ORM\Query;
-use Doctrine\ORM\Query\Parameter;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -70,7 +67,7 @@ class TitreRepository extends ServiceEntityRepository
      * AND c.is_rapproche = 1
      * ORDER BY c.montant DESC
      *
-     * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
      */
     public function findWithTraitement($rapproche)
     {
@@ -95,6 +92,35 @@ class TitreRepository extends ServiceEntityRepository
 
         return $result;
     }
+
+    public function findWithTraitementExtractionAtRapproche($rapproche, $extractionAt, $traitement)
+    {
+        $entityManager = $this->getEntityManager();
+        $sql = "    SELECT t.id, t.reference, t.extraction_at, o.name
+                    FROM b2_titre t
+                    LEFT JOIN b2_traitements ttt
+                    ON ttt.titre_id = t.id
+                    LEFT JOIN b2_observations o
+                    ON o.id = ttt.observation_id
+                    WHERE ttt.id = (
+                        SELECT ttt2.id
+                        FROM b2_traitements ttt2
+                        WHERE ttt.titre_id = ttt2.titre_id
+                        ORDER BY traite_at DESC LIMIT 1
+                    )
+                    AND t.is_rapproche = ?
+                    AND t.extraction_at <> ?
+                    AND o.name = ?";
+        $query = $entityManager->getConnection()->prepare($sql);
+        $query->bindValue(1, $rapproche);
+        $query->bindValue(2, $extractionAt);
+        $query->bindValue(3, $traitement);
+
+        $result = $query->executeQuery()->fetchAllAssociative();
+
+        return $result;
+    }
+
 
     public function findOneJson($reference)
     {
@@ -128,31 +154,31 @@ class TitreRepository extends ServiceEntityRepository
         return $result;
     }
 
-/*
-    public function findByPaginated($page, $limit, $rapproche, $order, $sens)
-    {
-        $query = $this->createQueryBuilder('a')
-            ->where('a.is_rapproche = :rapproche')
-            ->setParameter('rapproche', $rapproche)
-            ->orderBy('a.'.$order, $sens)
-            ->setFirstResult(($page * $limit) - $limit)
-            ->setMaxResults($limit);
-        return $query->getQuery()->getResult();
-    }
+    /*
+        public function findByPaginated($page, $limit, $rapproche, $order, $sens)
+        {
+            $query = $this->createQueryBuilder('a')
+                ->where('a.is_rapproche = :rapproche')
+                ->setParameter('rapproche', $rapproche)
+                ->orderBy('a.'.$order, $sens)
+                ->setFirstResult(($page * $limit) - $limit)
+                ->setMaxResults($limit);
+            return $query->getQuery()->getResult();
+        }
 
-    public function getTotalRejetsNonRapproche()
-    {
-        $query = $this->createQueryBuilder('r')
-            ->select('COUNT(r)')
-            ->where('r.is_rapproche = 0')
-            ;
-        return $query->getQuery()->getSingleScalarResult();
-    }
-*/
+        public function getTotalRejetsNonRapproche()
+        {
+            $query = $this->createQueryBuilder('r')
+                ->select('COUNT(r)')
+                ->where('r.is_rapproche = 0')
+                ;
+            return $query->getQuery()->getSingleScalarResult();
+        }
+    */
     public function titreWithSameIep($iep, $reference)
     {
         $em = $this->getEntityManager();
-            $sql = "SELECT t.reference
+        $sql = "SELECT t.reference
                     FROM b2_titre t
                     WHERE t.iep = ?
                     EXCEPT
@@ -168,6 +194,7 @@ class TitreRepository extends ServiceEntityRepository
 
         return $result;
     }
+
     public function titreWithSameIpp($ipp, $reference)
     {
         $em = $this->getEntityManager();
@@ -214,7 +241,7 @@ class TitreRepository extends ServiceEntityRepository
     public function countSumByObs($rapproche, $observation, $type = null)
     {
         $entityManager = $this->getEntityManager();
-        if($type && $type !== 'Total'){
+        if ($type && $type !== 'Total') {
             $sql = "    SELECT COUNT(t.id) AS countItem,
                     SUM(t.montant) AS sumItem,
                     o.name AS observation
@@ -232,7 +259,7 @@ class TitreRepository extends ServiceEntityRepository
                     AND t.is_rapproche = ? 
                     AND o.name = ?
                     AND t.type = ?";
-        }else{
+        } else {
             $sql = "    SELECT COUNT(t.id) AS countItem,
                     SUM(t.montant) AS sumItem,
                     o.name AS observation
@@ -254,7 +281,7 @@ class TitreRepository extends ServiceEntityRepository
         $query = $entityManager->getConnection()->prepare($sql);
         $query->bindValue(1, $rapproche);
         $query->bindValue(2, $observation);
-        if($type && $type !== 'Total'){
+        if ($type && $type !== 'Total') {
             $query->bindValue(3, $type);
         }
 
