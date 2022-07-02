@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Entity\B2\Parametres;
 use App\Entity\Users;
 use App\Form\RegistrationFormType;
 use App\Repository\UsersRepository;
@@ -13,12 +12,16 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 
 class RegistrationController extends AbstractController
 {
+    /**
+     * @throws TransportExceptionInterface
+     */
     #[Route('/inscription', name: 'app_register')]
     public function register(Request                    $request, UserPasswordHasherInterface $userPasswordHasher,
                              UserAuthenticatorInterface $userAuthenticator, UsersAuthenticator $authenticator,
@@ -88,7 +91,7 @@ class RegistrationController extends AbstractController
             // On récupère le payload
             $payload = $jwt->getPayload($token);
 
-            // On récupère le user du token
+            // On récupère le "user" du token
             $user = $usersRepository->find($payload['user_id']);
 
             //On vérifie que l'utilisateur existe et n'a pas encore activé son compte
@@ -105,8 +108,11 @@ class RegistrationController extends AbstractController
         return $this->redirectToRoute('app_login');
     }
 
+    /**
+     * @throws TransportExceptionInterface
+     */
     #[Route('/renvoiverif', name: 'resend_verif')]
-    public function resendVerif(JWTService $jwt, SendMailService $mail, UsersRepository $usersRepository): Response
+    public function resendVerif(JWTService $jwt, SendMailService $mail): Response
     {
         $user = $this->getUser();
 

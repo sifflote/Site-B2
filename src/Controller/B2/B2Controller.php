@@ -19,6 +19,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\User\UserInterface;
 use function array_diff;
 
 
@@ -203,7 +204,7 @@ class B2Controller extends AbstractController
         } else {
             $titres2 = $titreRepository->findBy(['is_rapproche' => 0], ['montant' => 'DESC']);
 
-        }//Fin filtre débiteurs
+        }//Fin filtre des débiteurs
 
         // Modal Traitement
         $observations = $observationsRepository->findBy([], ['name' => 'ASC']);

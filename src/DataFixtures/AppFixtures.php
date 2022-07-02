@@ -7,22 +7,19 @@ use App\Entity\Users;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\String\Slugger\SluggerInterface;
 use Faker;
 
 class AppFixtures extends Fixture
 {
     public function __construct(
-        private UserPasswordHasherInterface $passwordHasher
+        private readonly UserPasswordHasherInterface $passwordHasher
     ){}
 
     public function load(ObjectManager $manager): void
     {
-        $users = [];
 
         $admin = new Users();
         $admin->setEmail('admin@sifflote.fr');
-        $admin->setFullname('Administrateur');
         $admin->setUsername('Admin');
         $admin->setB2RejetsPerPage(500);
         $admin->setIsVerified(1);
@@ -39,13 +36,11 @@ class AppFixtures extends Fixture
             $user = new Users();
             $user->setEmail($faker->email);
             $user->setUsername($faker->userName);
-            $user->setFullname($faker->name);
             $user->setB2RejetsPerPage(500);
             $user->setRoles(['ROLE_USER']);
             $user->setMdpUse(true);
             $user->setPlainpassword('secret');
 
-            $users[] = $user;
             $manager->persist($user);
         }
 

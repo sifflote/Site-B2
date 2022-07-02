@@ -14,7 +14,7 @@ class TitreController extends AbstractController
 {
     /**
      *
-     * Affichage du titre dans la Modal     *
+     * Affichage du titre dans la Modal
      *
      * @param TitreRepository $titreRepository
      * @param PostitRepository $postitRepository
@@ -40,7 +40,8 @@ class TitreController extends AbstractController
             'titre' => $titreJson
         ], 403);
 
-        return $this->json(['data' => $titreJson, 'historiques' => $historiques, 'postit' => $postit, 'ieps' => $titreWithSameIep, 'ipps' => $titreWithSameIpp], 200);
+        // Le retour Json possède un paramètre par défaut de 200
+        return $this->json(['data' => $titreJson, 'historiques' => $historiques, 'postit' => $postit, 'ieps' => $titreWithSameIep, 'ipps' => $titreWithSameIpp]);
 
     }
 

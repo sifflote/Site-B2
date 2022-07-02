@@ -136,7 +136,7 @@ class TitreRepository extends ServiceEntityRepository
                     INNER JOIN b2_traitements p ON c.id = p.titre_id
                     INNER JOIN b2_observations o ON p.observation_id = o.id
                     INNER JOIN b2_uh u ON c.uh_id = u.id
-                    INNER JOIN users us ON p.user_id = us.id
+                    INNER JOIN b2_users us ON p.user_id = us.id
                     WHERE p.id =(
                     SELECT p2.id
                     FROM b2_traitements p2
@@ -227,7 +227,7 @@ class TitreRepository extends ServiceEntityRepository
                     b2_titre t
                     INNER JOIN b2_traitements h ON h.titre_id = t.id
                     INNER JOIN b2_observations o ON  o.id = h.observation_id
-                    INNER JOIN users u ON u.id = h.user_id
+                    INNER JOIN b2_users u ON u.id = h.user_id
                     WHERE t.reference = ?
                     ORDER BY h.traite_at DESC";
         $query = $entityManager->getConnection()->prepare($sql);

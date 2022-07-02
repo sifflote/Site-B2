@@ -25,12 +25,11 @@ class ProfileController extends AbstractController
      * @param Users $currentUser
      * @param Request $request
      * @param EntityManagerInterface $em
-     * @param UserPasswordHasherInterface $hasher
      * @return Response
      */
     #[Security("is_granted('ROLE_USER') and user === currentUser")]
     #[Route('/{id}', name: 'index')]
-    public function index(Users $currentUser, Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $hasher): Response
+    public function index(Users $currentUser, Request $request, EntityManagerInterface $em): Response
     {
 
         $form = $this->createForm(UsersType::class, $currentUser);
@@ -38,7 +37,7 @@ class ProfileController extends AbstractController
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $user = $form->getData();
+            $currentUser = $form->getData();
             $em->persist($currentUser);
             $em->flush();
 

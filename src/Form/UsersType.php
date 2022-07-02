@@ -32,19 +32,6 @@ class UsersType extends AbstractType
                     new Length(['min' => 2, 'max' => 50])
                 ]
             ])
-            ->add('fullname', TextType::class, [
-                'attr' => [
-                    'class' => 'form-control',
-                    'minlenght' => 2,
-                    'maxlenght' => 50
-                ],
-                'label' => 'Nom Complet',
-                'constraints' => [
-                    new NotBlank(),
-                    new Length(['min' => 2, 'max' => 50])
-                ]
-            ])
-
             ->add('email', EmailType::class, [
                 'attr' => [
                     'class' => 'form-control',

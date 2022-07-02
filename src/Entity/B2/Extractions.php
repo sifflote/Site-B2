@@ -3,6 +3,7 @@
 namespace App\Entity\B2;
 
 use App\Repository\B2\ExtractionsRepository;
+use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ExtractionsRepository::class)]
@@ -12,40 +13,43 @@ class Extractions
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
-    private $id;
+    private int $id;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private $name;
+    private ?string $name;
 
     #[ORM\Column(type: 'datetime_immutable')]
-    private $import_at;
+    private ?DateTimeImmutable $import_at;
 
     #[ORM\Column(type: 'integer')]
-    private $files;
+    private ?int $files;
 
     #[ORM\Column(type: 'integer')]
-    private $verify;
+    private ?int $verify;
 
     #[ORM\Column(type: 'integer')]
-    private $verify2;
+    private ?int $verify2;
 
     #[ORM\Column(type: 'integer')]
-    private $newLine = 0;
+    private int $newLine = 0;
 
     #[ORM\Column(type: 'integer')]
-    private $countLine = 0;
+    private int $countLine = 0;
 
     #[ORM\Column(type: 'integer', nullable: true)]
-    private $rapproche;
+    private ?int $rapproche;
 
     #[ORM\Column(type: 'boolean')]
-    private $isPurge = 0;
+    private int $isPurge = 0;
 
     #[ORM\Column(type: 'integer')]
-    private $count_obs = 0;
+    private int $count_obs = 0;
 
     #[ORM\Column(type: 'boolean')]
-    private $withObs;
+    private ?bool $withObs;
+
+    #[ORM\Column(type: 'integer')]
+    private ?int $analyse = 0;
 
     public function getId(): ?int
     {
@@ -64,12 +68,12 @@ class Extractions
         return $this;
     }
 
-    public function getImportAt(): ?\DateTimeImmutable
+    public function getImportAt(): ?DateTimeImmutable
     {
         return $this->import_at;
     }
 
-    public function setImportAt(\DateTimeImmutable $import_at): self
+    public function setImportAt(DateTimeImmutable $import_at): self
     {
         $this->import_at = $import_at;
 
@@ -180,6 +184,18 @@ class Extractions
     public function setWithObs(bool $withObs): self
     {
         $this->withObs = $withObs;
+
+        return $this;
+    }
+
+    public function getAnalyse(): ?int
+    {
+        return $this->analyse;
+    }
+
+    public function setAnalyse(int $analyse): self
+    {
+        $this->analyse = $analyse;
 
         return $this;
     }

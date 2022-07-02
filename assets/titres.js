@@ -163,7 +163,53 @@ $(document).ready( function () {
         });
     });
 });
+if (window.location.hash) {
+    const hash = window.location.hash.substring(1);
+    const t = 'titre-' + hash;
 
+    function onload() {
+        document.getElementById(t).className = " table-info";
+    }
+
+    window.onload = onload;
+    // hash found
+}
+
+$(document).ready(function () {
+    const typesSelect = ["{{ typesSelect | join('","') | raw }}"];
+    $('#typeFilter').select2({
+        placeholder: 'Type...',
+        theme: 'bootstrap-5'
+    }).val(typesSelect).trigger('change');
+
+    const debiteursSelect = ["{{ debiteursSelect | join('","') | raw }}"];
+    $('#debFilter').select2({
+        placeholder: 'Par Débiteurs...',
+        theme: 'bootstrap-5',
+        allowClear: true
+    }).val(debiteursSelect).trigger('change');
+
+    const descriptionsSelect = ["{{ descriptionsSelect | join('","') | raw }}"];
+    $('#descFilter').select2({
+        placeholder: 'Par Description...',
+        theme: 'bootstrap-5',
+        allowClear: true
+    }).val(descriptionsSelect).trigger('change');
+
+    const designationsSelect = ["{{ designationsSelect | join('","') | raw }}"];
+    $('#desigFilter').select2({
+        placeholder: 'Par Désignation...',
+        theme: 'bootstrap-5',
+        allowClear: true
+    }).val(designationsSelect).trigger('change');
+
+    const uhsSelect = ["{{ uhsSelect | join('","') | raw }}"];
+    $('#uhFilter').select2({
+        placeholder: 'Par UH...',
+        theme: 'bootstrap-5',
+        allowClear: true
+    }).val(uhsSelect).trigger('change');
+});
 $(document).ready(function(){
     $('.dropdown-submenu a.test').on("click", function(e){
         $(this).next('ul').toggle();

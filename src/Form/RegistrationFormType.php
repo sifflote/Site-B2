@@ -26,19 +26,7 @@ class RegistrationFormType extends AbstractType
                     'minlenght' => 2,
                     'maxlenght' => 50
                 ],
-                'label' => 'Pseudonyme',
-                'constraints' => [
-                    new NotBlank(),
-                    new Length(['min' => 2, 'max' => 50])
-                ]
-            ])
-            ->add('fullname', TextType::class, [
-                'attr' => [
-                    'class' => 'form-control',
-                    'minlenght' => 2,
-                    'maxlenght' => 50
-                ],
-                'label' => 'Nom complet',
+                'label' => 'Nom sur le site',
                 'constraints' => [
                     new NotBlank(),
                     new Length(['min' => 2, 'max' => 50])

@@ -17,6 +17,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: UsersRepository::class)]
 #[ORM\EntityListeners(['App\EntityListener\UsersListener'])]
 #[UniqueEntity(fields: ['email'], message: 'Cet e-mail est déjà utilisé.')]
+#[ORM\Table(name: 'b2_users')]
 class Users implements UserInterface, PasswordAuthenticatedUserInterfaceAlias // Pas d'erreur ici
 {
 
@@ -63,9 +64,6 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterfaceAlias //
     #[ORM\Column(type: 'integer', options: ['default' => 500])]
     private ?int $b2RejetsPerPage = 500;
 
-    #[ORM\Column(type: 'string', length: 100)]
-    private $Fullname;
-
     #[ORM\Column(type: 'boolean')]
     private $googleUse = 0;
 
@@ -77,7 +75,7 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterfaceAlias //
 
     public function __construct()
     {
-        $this->orders = new ArrayCollection();
+
         $this->createdAt = new DateTimeImmutable();
         $this->b2_traitements = new ArrayCollection();
         $this->b2Historiques = new ArrayCollection();
@@ -270,18 +268,6 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterfaceAlias //
     public function setB2RejetsPerPage(int $b2RejetsPerPage): self
     {
         $this->b2RejetsPerPage = $b2RejetsPerPage;
-
-        return $this;
-    }
-
-    public function getFullname(): ?string
-    {
-        return $this->Fullname;
-    }
-
-    public function setFullname(string $Fullname): self
-    {
-        $this->Fullname = $Fullname;
 
         return $this;
     }

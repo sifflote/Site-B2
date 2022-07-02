@@ -52,12 +52,11 @@ class ExtractionController extends AbstractController
      * @param Request $request
      * @param FileUploader $file_uploader
      * @param EntityManagerInterface $em
-     * @param UhRepository $uhRepository
      * @return RedirectResponse|Response
      */
     #[Route('/B2/upload', name: 'b2_upload')]
     #[IsGranted('ROLE_USER')]
-    public function csvImport(Request $request, FileUploader $file_uploader, EntityManagerInterface $em, UhRepository $uhRepository)
+    public function csvImport(Request $request, FileUploader $file_uploader, EntityManagerInterface $em): RedirectResponse|Response
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         $form = $this->createForm(FileUploadType::class);
@@ -86,7 +85,7 @@ class ExtractionController extends AbstractController
                     $fileCount = 0;
                     $out = null;
 
-                    while (!feof($in,)) {
+                    while (!feof($in)) {
                         if (($count_row % $splitSize) == 0) {
                             if ($count_row > 0) {
                                 fclose($out);
@@ -120,13 +119,12 @@ class ExtractionController extends AbstractController
                     $em->flush();
 
                     $this->addFlash('success', "Upload réussi Fichier: $file_name découpé en $fileCount fichier(s).");
-                    return $this->redirectToRoute('b2_extractions');
 
                 } else {
-                    // Oups, an error occured !!!
+                    // Oups, an error !!!
                     $this->addFlash('danger', 'Problème lors de l\'upload');
-                    return $this->redirectToRoute('b2_extractions');
                 }
+                return $this->redirectToRoute('b2_extractions');
             }
         }
 
@@ -136,7 +134,7 @@ class ExtractionController extends AbstractController
         }
         return $this->render('B2/upload.html.twig', [
             'form' => $form->createView(),
-            'csv' => ($csv ? $csv : null)
+            'csv' => ($csv ?: null)
         ]);
     }
 
@@ -161,7 +159,7 @@ class ExtractionController extends AbstractController
         $file_name = $request->get('file') . '.csv';
         $directory = $file_uploader->getTargetDirectory();
         $full_path = $directory . '/' . $file_name;
-        $openfile = fopen($full_path, "r");
+        //$openfile = fopen($full_path, "r");
         //$cont = fread($openfile, filesize($full_path));
         $csv = array_map('str_getcsv', file($full_path));
         if (explode('part-', $file_name)[0] == 1) {
@@ -173,7 +171,7 @@ class ExtractionController extends AbstractController
         $newLine = 0;
         // Passé tous les titres en non présent last extractions
 
-        foreach ($csv as $ligne => $value) {
+        foreach ($csv as $value) {
             if ($i > 0) {
 
                 $verif_titre = $titreRepository->findOneBy(['reference' => $value[11]]);
@@ -226,15 +224,14 @@ class ExtractionController extends AbstractController
                     $newLine++;
                     $titre->setIsInLastExtraction(1);
                     $em->persist($titre);
-                    $em->flush();
                 } else {
                     //si le titre est déjà présent on change la date de mise à jour
                     $verif_titre->setMajAt($extraction->getImportAt());
                     $verif_titre->setRprs($rprs);
                     $verif_titre->setIsInLastExtraction(1);
                     $em->persist($verif_titre);
-                    $em->flush();
                 }
+                $em->flush();
             }
             $i++;
         }
@@ -265,7 +262,6 @@ class ExtractionController extends AbstractController
      * @param Request $request
      * @param FileUploader $file_uploader
      * @param EntityManagerInterface $em
-     * @param UhRepository $uhRepository
      * @param ExtractionsRepository $extractionsRepository
      * @param TraitementsRepository $traitementsRepository
      * @param TitreRepository $titreRepository
@@ -276,7 +272,7 @@ class ExtractionController extends AbstractController
     #[Route('/B2/upload/verify/{file}', name: 'b2_verify')]
     #[IsGranted('ROLE_USER')]
     public function verify(Request               $request, FileUploader $file_uploader, EntityManagerInterface $em,
-                           UhRepository          $uhRepository, ExtractionsRepository $extractionsRepository,
+                           ExtractionsRepository $extractionsRepository,
                            TraitementsRepository $traitementsRepository,
                            TitreRepository       $titreRepository, ObservationsRepository $observationsRepository,
                            UserInterface         $user): RedirectResponse
@@ -286,21 +282,20 @@ class ExtractionController extends AbstractController
         $file_name = $request->get('file') . '.csv';
         $directory = $file_uploader->getTargetDirectory();
         $full_path = $directory . '/' . $file_name;
-        $file_number = explode('part-', $file_name)[0];
+        //$file_number = explode('part-', $file_name)[0];
 
-        $openfile = fopen($full_path, "r");
-        $cont = fread($openfile, filesize($full_path));
+        //$openfile = fopen($full_path, "r");
+        //$cont = fread($openfile, filesize($full_path));
         $csv = array_map('str_getcsv', file($full_path));
         if (explode('part-', $file_name)[0] == 1) {
             $i = 0;
         } else {
             $i = 1;
         }
-        $now = new DateTimeImmutable();
         $extraction = $extractionsRepository->findOneBy(['name' => explode('part-', $file_name)[1]]);
         $maj_obs = 0;
         // Vérification de chaque ligne
-        foreach ($csv as $ligne => $value) {
+        foreach ($csv as $value) {
 
             if ($i > 0) {
                 // On récupère le titre existant dans la BDD
@@ -311,6 +306,8 @@ class ExtractionController extends AbstractController
 
                 if ($extraction->getWithObs()) {
                     $observation = $observationsRepository->findOneBy(['name' => $value[28]]);
+                }else{
+                    $observation = null;
                 }
                 // si l'observation du fichier n'est pas vide et s'il n'y a pas de traitement
                 // OU
@@ -364,14 +361,13 @@ class ExtractionController extends AbstractController
      * Purge des fichiers rapprochés
      *
      * @param ExtractionsRepository $extractionsRepository
-     * @param TraitementsRepository $traitementsRepository
      * @param TitreRepository $titreRepository
      * @param EntityManagerInterface $em
      * @return Response
      */
     #[Route('B2/purge', name: 'b2_purge')]
     #[IsGranted('ROLE_USER')]
-    public function purge(ExtractionsRepository $extractionsRepository, TraitementsRepository $traitementsRepository, TitreRepository $titreRepository, EntityManagerInterface $em): Response
+    public function purge(ExtractionsRepository $extractionsRepository, TitreRepository $titreRepository, EntityManagerInterface $em): Response
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         $lastExtraction = $extractionsRepository->findOneBy([], ['import_at' => 'desc']);
@@ -379,7 +375,7 @@ class ExtractionController extends AbstractController
         $nbRapproche = 0;
         $aRapprocher = [];
         foreach ($titres as $titre) {
-            // si n'est pas (date de dernière extraction égale à date d'extraction, ou date de dernière extraction date de maj
+            // si n'est pas (date de dernière extraction égale à date d'extraction ou date de dernière extraction date de maj
             $nbRapproche++;
             $aRapprocher[] = $titre->getId();
 
@@ -412,8 +408,10 @@ class ExtractionController extends AbstractController
     /**
      * Purge des traitements
      *
+     * @param ExtractionsRepository $extractionsRepository
      * @param TitreRepository $titreRepository
      * @param TraitementsRepository $traitementsRepository
+     * @param ObservationsRepository $observationsRepository
      * @param EntityManagerInterface $em
      * @return Response
      */
@@ -444,6 +442,7 @@ class ExtractionController extends AbstractController
         $idNouveau = $observationsRepository->findOneBy(['name' => 'EXTRACTION PRECEDENTE'])->getId();
         $titresExtractionPrecedente = $titreRepository->findWithTraitementExtractionAtRapproche(0, $lastExtraction->getImportAt()->format('Y-m-d H:i:s'), 'NOUVEAU');
         $i = 0;
+        $listAModifier = [];
         foreach ($titresExtractionPrecedente as $aModifier) {
             $listAModifier[] = $traitementsRepository->findOneBy(['titre' => $aModifier['id']], ['traite_at' => 'DESC'])->getId();
             $i++;
@@ -468,7 +467,9 @@ class ExtractionController extends AbstractController
     // EXPORTER EN FICHIER CSV
 
     /**
+     * @param Request $request
      * @param TitreRepository $titreRepository
+     * @param TraitementsRepository $traitementsRepository
      * @return BinaryFileResponse
      */
     #[Route('B2/export_csv/{?type}', name: 'b2_export_csv')]
@@ -483,6 +484,7 @@ class ExtractionController extends AbstractController
             $type = 'sheet';
         }
         $titres = $titreRepository->findBy(['is_rapproche' => 0], ['montant' => 'DESC']);
+        $export = [];
         foreach($titres as $titre)
         {
             $ttt = $traitementsRepository->findOneBy(['titre' => $titre->getId()], ['traite_at' => 'DESC']);
@@ -519,7 +521,7 @@ class ExtractionController extends AbstractController
                 $titre->getRejetAt()->format('d/m/Y'),
                 //Obs
                 $ttt->getObservation()->getName(),
-                //Prec
+                //Précisions
                 $ttt->getPrecisions(),
                 //date ttt
                 $ttt->getTraiteAt()->format('d/m/Y')
@@ -541,7 +543,7 @@ class ExtractionController extends AbstractController
         $fichier_csv = fopen($chemin, 'w+');
 
         /*
-            Si votre fichier a vocation a être importé dans Excel,
+            Si votre fichier a vocation à être importé dans Excel,
             vous devez impérativement utiliser la ligne ci-dessous pour corriger
             les problèmes d'affichage des caractères internationaux (les accents par exemple)
         */
@@ -556,7 +558,7 @@ class ExtractionController extends AbstractController
         // Boucle pour se déplacer dans les tableaux
         foreach($export as $ligneaexporter){
             // chaque ligne en cours de lecture est insérée dans le fichier
-            // les valeurs présentes dans chaque ligne seront séparées par $delimiteur
+            // les valeurs présentes dans chaque ligne seront séparées par la variable $delimiteur
             fputcsv($fichier_csv, $ligneaexporter, $delimiteur);
 
         }
@@ -567,4 +569,50 @@ class ExtractionController extends AbstractController
         $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT,'export-'.$type.'-'.$date.'.csv');
         return $response;
     }
+
+
+    /**
+     * @param Request $request
+     * @param FileUploader $file_uploader
+     * @param EntityManagerInterface $em
+     * @param ExtractionsRepository $extractionsRepository
+     * @param TraitementsRepository $traitementsRepository
+     * @param TitreRepository $titreRepository
+     * @param ObservationsRepository $observationsRepository
+     * @param UserInterface $user
+     * @return RedirectResponse
+     */
+    #[Route('/B2/upload/stat/{file}', name: 'b2_verify_stat')]
+    #[IsGranted('ROLE_USER')]
+    public function stat(Request               $request, FileUploader $file_uploader, EntityManagerInterface $em,
+                           ExtractionsRepository $extractionsRepository,
+                           TraitementsRepository $traitementsRepository,
+                           TitreRepository       $titreRepository, ObservationsRepository $observationsRepository,
+                           UserInterface         $user): RedirectResponse
+    {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+        // On récupère le fichier
+        $file_name = $request->get('file') . '.csv';
+        $directory = $file_uploader->getTargetDirectory();
+        $full_path = $directory . '/' . $file_name;
+        //$file_number = explode('part-', $file_name)[0];
+
+        //$openfile = fopen($full_path, "r");
+        //$cont = fread($openfile, filesize($full_path));
+        $csv = array_map('str_getcsv', file($full_path));
+        if (explode('part-', $file_name)[0] == 1) {
+            $i = 0;
+        } else {
+            $i = 1;
+        }
+        $extraction = $extractionsRepository->findOneBy(['name' => explode('part-', $file_name)[1]]);
+        $maj_obs = 0;
+        // Vérification de chaque ligne
+        foreach ($csv as $value) {
+
+
+        }
+    }
+
+
 }
