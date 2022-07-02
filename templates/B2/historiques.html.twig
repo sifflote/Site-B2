@@ -30,7 +30,7 @@
                     {{ historique.user.username }}
                 </th>
                 <td>
-                    {{ historique.context }}
+                    {{ historique.context }}{% if historique.observation %} - {{ historique.observation.name }}{% endif %}
                 </td>
             </tr>
         {% endfor %}

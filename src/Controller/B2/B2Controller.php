@@ -220,7 +220,7 @@ class B2Controller extends AbstractController
             $now = new DateTimeImmutable();
             $user = $this->getUser();
 
-            // mis à jour tu traitement
+            // mis à jour du traitement
             $traitement_last = $traitementsRepository->findOneBy(['titre' => $titre->getId()], ['traite_at' => 'DESC']);
             $traitement->setTitre($titre);
             $traitement->setUser($user);
@@ -238,7 +238,7 @@ class B2Controller extends AbstractController
                     ||
                     ($traitement_last->getObservation() !== $traitement->getObservation()))) {
                 $this->em->persist($traitement);
-                $this->addHistorique($user, 'Nouvelle observation pour le titre ' . $titre->getReference());
+                $this->addHistorique($user, 'Nouvelle observation pour le titre ' . $titre->getReference(), $observation);
             }
             //postit
             $postit_exist = $postitRepository->findOneBy(['ipp' => $titre->getIpp()]);
@@ -293,15 +293,17 @@ class B2Controller extends AbstractController
      *
      * @param $user_id
      * @param $message
+     * @param null $observation
      * @return void
      */
-    private function addHistorique($user_id, $message): void
+    private function addHistorique($user_id, $message, $observation =null): void
     {
         $now = new DateTimeImmutable();
         $historique = new Historique();
         $historique->setUser($user_id);
         $historique->setContext($message);
         $historique->setDateAt($now);
+        $historique->setObservation($observation);
         $this->em->persist($historique);
         $this->em->flush();
     }

@@ -25,6 +25,9 @@ class Historique
     #[ORM\Column(type: 'text')]
     private $context;
 
+    #[ORM\ManyToOne(targetEntity: Observations::class, inversedBy: 'historiques')]
+    private $observation;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -62,6 +65,18 @@ class Historique
     public function setContext(string $context): self
     {
         $this->context = $context;
+
+        return $this;
+    }
+
+    public function getObservation(): ?Observations
+    {
+        return $this->observation;
+    }
+
+    public function setObservation(?Observations $observation): self
+    {
+        $this->observation = $observation;
 
         return $this;
     }

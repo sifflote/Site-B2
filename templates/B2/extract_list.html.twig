@@ -13,6 +13,10 @@
                         class="fa-solid fa-file-import"></i> Importer</a>
             <a class="nav-link active link-success" href="{{ path('b2_purge_ttt') }}"><i class="fa-solid fa-rotate"></i>
                 Vérifier les Observations</a>
+            <a class="nav-link active link-success" href="{{ path('b2_export_csv', {type: 'excel'}) }}"><i class="fa-solid fa-file-excel"></i>
+                Exporter données actuelles pour Microsoft Excel</a>
+            <a class="nav-link active link-success" href="{{ path('b2_export_csv', {type: 'sheet'}) }}"><i class="fa-solid fa-file-csv"></i>
+                Exporter données actuelles pour Google Sheet</a>
         </nav>
     </div>
     <main class="container">

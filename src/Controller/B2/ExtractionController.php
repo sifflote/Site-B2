@@ -19,9 +19,11 @@ use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -460,5 +462,109 @@ class ExtractionController extends AbstractController
         $this->addFlash('info', 'Passage de  ' . $i . ' traitements "Nouveau" en "Extraction précédente.');
 
         return $this->redirectToRoute('b2_extractions');
+    }
+
+
+    // EXPORTER EN FICHIER CSV
+
+    /**
+     * @param TitreRepository $titreRepository
+     * @return BinaryFileResponse
+     */
+    #[Route('B2/export_csv/{?type}', name: 'b2_export_csv')]
+    #[IsGranted('ROLE_USER')]
+    public function export(Request $request,TitreRepository $titreRepository,TraitementsRepository $traitementsRepository): BinaryFileResponse
+    {
+        if($request->get('type') === 'excel'){
+            $separator = ';';
+            $type = 'excel';
+        }else{
+            $separator =',';
+            $type = 'sheet';
+        }
+        $titres = $titreRepository->findBy(['is_rapproche' => 0], ['montant' => 'DESC']);
+        foreach($titres as $titre)
+        {
+            $ttt = $traitementsRepository->findOneBy(['titre' => $titre->getId()], ['traite_at' => 'DESC']);
+            $rprs = ($titre->getRprs() == 1 ? 'RPRS' : '');
+            // Titre a exporter
+            $export[] = [
+                $titre->getType(),
+                $titre->getClasse(),
+                $titre->getIep(),
+                $titre->getIpp(),
+                $titre->getFacture(),
+                $titre->getName(),
+                $titre->getEnterAt()->format('d/m/Y'),
+                $titre->getExitAt()->format('d/m/Y'),
+                $titre->getMontant(),
+                $titre->getEncaissement(),
+                $titre->getRestantdu(),
+                $titre->getReference(),
+                $titre->getPec(),
+                $titre->getLot(),
+                $titre->getPayeur(),
+                $titre->getCodeRejet(),
+                $titre->getDescRejet(),
+                $titre->getCreeAt()->format('d/m/Y'),
+                $titre->getRejetAt()->format('d/m/Y'),
+                $titre->getDesignation(),
+                $titre->getUh()->getNumero(),
+                $titre->getInsee(),
+                $titre->getRang(),
+                $titre->getNaissanceAt()->format('d/m/Y'),
+                $titre->getContrat(),
+                $titre->getNaissanceHf(),
+                $rprs,
+                $titre->getRejetAt()->format('d/m/Y'),
+                //Obs
+                $ttt->getObservation()->getName(),
+                //Prec
+                $ttt->getPrecisions(),
+                //date ttt
+                $ttt->getTraiteAt()->format('d/m/Y')
+
+            ];
+        }
+        // Nom du fichier
+        $date = new DateTime();
+        $date = $date->format('dmY');
+        $chemin = 'export/export-'.$type.'-'.$date.'.csv';
+        $delimiteur = $separator;
+        // Création du fichier csv
+        // fopen : Ouvre un fichier
+        /*
+            w+ : Ouvre en lecture et écriture ;
+            Place le pointeur de fichier au début du fichier et réduit la taille du fichier à 0.
+            Si le fichier n'existe pas, on tente de le créer.
+        */
+        $fichier_csv = fopen($chemin, 'w+');
+
+        /*
+            Si votre fichier a vocation a être importé dans Excel,
+            vous devez impérativement utiliser la ligne ci-dessous pour corriger
+            les problèmes d'affichage des caractères internationaux (les accents par exemple)
+        */
+        fprintf($fichier_csv, chr(0xEF).chr(0xBB).chr(0xBF));
+
+        // On affiche une fois l'entête sans boucle
+        $entetes = array("Type","Classe","Numéro d'entrée","Id. Patient (NIP ou IPP)","Facture","Nom 1","Date de début de l'acte","Date de fin de l'acte","MontantTTCfacture","TotalEncaissement","Restantdû","Référence","PEC","Lot","Payeur","Code rejet NOEMIE","Description rejet NOEMIE","Créé le","Date d'envoi","Désignation","UH","N° INSEE","Rang","Date de naissance","N° Contrat","Naissance HF","RPRS","Date de rejet","Observation","Précision","Date de traitement CTX");
+
+        fputcsv($fichier_csv, $entetes, $delimiteur);
+
+        // Boucle foreach sur chaque ligne du tableau
+        // Boucle pour se déplacer dans les tableaux
+        foreach($export as $ligneaexporter){
+            // chaque ligne en cours de lecture est insérée dans le fichier
+            // les valeurs présentes dans chaque ligne seront séparées par $delimiteur
+            fputcsv($fichier_csv, $ligneaexporter, $delimiteur);
+
+        }
+        // fermeture du fichier csv
+        fclose($fichier_csv);
+        //$this->addFlash('success', '<a href="{{ asset("export/export.csv") }}">Exportation prête à être téléchargée.</a>');
+        $response = new BinaryFileResponse('export/export-'.$type.'-'.$date.'.csv');
+        $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT,'export-'.$type.'-'.$date.'.csv');
+        return $response;
     }
 }

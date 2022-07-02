@@ -28,9 +28,13 @@ class Observations
     #[ORM\Column(type: 'string', length: 50, nullable: true)]
     private $bgcolor;
 
+    #[ORM\OneToMany(mappedBy: 'observation', targetEntity: Historique::class)]
+    private $historiques;
+
     public function __construct()
     {
         $this->traitements = new ArrayCollection();
+        $this->historiques = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -105,6 +109,36 @@ class Observations
     public function setBgcolor(?string $bgcolor): self
     {
         $this->bgcolor = $bgcolor;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Historique>
+     */
+    public function getHistoriques(): Collection
+    {
+        return $this->historiques;
+    }
+
+    public function addHistorique(Historique $historique): self
+    {
+        if (!$this->historiques->contains($historique)) {
+            $this->historiques[] = $historique;
+            $historique->setObservation($this);
+        }
+
+        return $this;
+    }
+
+    public function removeHistorique(Historique $historique): self
+    {
+        if ($this->historiques->removeElement($historique)) {
+            // set the owning side to null (unless already changed)
+            if ($historique->getObservation() === $this) {
+                $historique->setObservation(null);
+            }
+        }
 
         return $this;
     }
