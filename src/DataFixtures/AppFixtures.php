@@ -12,7 +12,7 @@ use Faker;
 class AppFixtures extends Fixture
 {
     public function __construct(
-        private readonly UserPasswordHasherInterface $passwordHasher
+        private UserPasswordHasherInterface $passwordHasher
     ){}
 
     public function load(ObjectManager $manager): void
