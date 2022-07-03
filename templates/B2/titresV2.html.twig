@@ -156,8 +156,8 @@
                         <td>{{ titre.ipp }}
                             <div class="jumptarget" id="{{ titre.reference }}"></div>
                         </td>
-                        <td class="text-end nowrap">{{ titre.montant|format_currency('EUR', locale='fr') }}</td>
-                        <td class="text-end nowrap">{{ titre.encaissement|format_currency('EUR', locale='fr') }}</td>
+                        <td class="text-end nowrap">{{ titre.montant|number_format(2, ',', '&#x2009;')|raw }} €</td>
+                        <td class="text-end nowrap">{{ titre.encaissement|number_format(2, ',', '&#x2009;') }} €</td>
                         <td class="text-end">
                             <figure>
                                 <blockquote class=""><a data-id="{{ titre.reference }}"
@@ -189,4 +189,53 @@
     {{ parent() }}
     {{ encore_entry_script_tags('titres') }}
     {{ encore_entry_script_tags('keepConditions') }}
+    <script type="text/javascript">
+        if (window.location.hash) {
+            const hash = window.location.hash.substring(1);
+            var t = 'titre-' + hash
+
+            function onload() {
+                document.getElementById(t).className = " table-info";
+            }
+
+            window.onload = onload;
+            // hash found
+        }
+
+        $(document).ready(function () {
+            var typesSelect = ["{{ typesSelect | join('","') | raw }}"];
+            $('#typeFilter').select2({
+                placeholder: 'Type...',
+                theme: 'bootstrap-5'
+            }).val(typesSelect).trigger('change');
+
+            var debiteursSelect = ["{{ debiteursSelect | join('","') | raw }}"];
+            $('#debFilter').select2({
+                placeholder: 'Par Débiteurs...',
+                theme: 'bootstrap-5',
+                allowClear: true
+            }).val(debiteursSelect).trigger('change');
+
+            var descriptionsSelect = ["{{ descriptionsSelect | join('","') | raw }}"];
+            $('#descFilter').select2({
+                placeholder: 'Par Description...',
+                theme: 'bootstrap-5',
+                allowClear: true
+            }).val(descriptionsSelect).trigger('change');
+
+            var designationsSelect = ["{{ designationsSelect | join('","') | raw }}"];
+            $('#desigFilter').select2({
+                placeholder: 'Par Désignation...',
+                theme: 'bootstrap-5',
+                allowClear: true
+            }).val(designationsSelect).trigger('change');
+
+            var uhsSelect = ["{{ uhsSelect | join('","') | raw }}"];
+            $('#uhFilter').select2({
+                placeholder: 'Par UH...',
+                theme: 'bootstrap-5',
+                allowClear: true
+            }).val(uhsSelect).trigger('change');
+        });
+    </script>
 {% endblock %}
