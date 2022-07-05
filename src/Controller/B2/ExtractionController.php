@@ -305,7 +305,12 @@ class ExtractionController extends AbstractController
                 $traitement = $traitementsRepository->findBy(['titre' => $titre->getId()], ['traite_at' => 'DESC'], 1, 0);
 
                 if ($extraction->getWithObs()) {
-                    $observation = $observationsRepository->findOneBy(['name' => $value[28]]);
+                    if($value[28] === ''){
+                        $recherche = 'NOUVEAU';
+                    }else{
+                        $recherche = $value[28];
+                    }
+                    $observation = $observationsRepository->findOneBy(['name' => $recherche]);
                 }else{
                     $observation = null;
                 }
