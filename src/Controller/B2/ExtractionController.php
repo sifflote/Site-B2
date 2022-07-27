@@ -71,8 +71,11 @@ class ExtractionController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
 
             $file = $form['upload_file']->getData();
+
             if ($file) {
                 $file_name = $file_uploader->upload($file);
+                //$file_name = 'B2-'.$output2->format('d-m-Y-His').'.csv';
+
                 if (null !== $file_name) {
                     $directory = $file_uploader->getTargetDirectory();
                     $full_path = $directory . '/' . $file_name;
@@ -161,7 +164,10 @@ class ExtractionController extends AbstractController
         $full_path = $directory . '/' . $file_name;
         //$openfile = fopen($full_path, "r");
         //$cont = fread($openfile, filesize($full_path));
+        // Si délimiteur est , de googleSheet
         $csv = array_map('str_getcsv', file($full_path));
+        // Si délimiteur est ; de excel
+        //$csv = array_map(function($v) { return str_getcsv($v, ';'); }, file($full_path));
         if (explode('part-', $file_name)[0] == 1) {
             $i = 0;
         } else {
@@ -170,8 +176,9 @@ class ExtractionController extends AbstractController
         $extraction = $extractionsRepository->findOneBy(['name' => explode('part-', $file_name)[1]]);
         $newLine = 0;
         // Passé tous les titres en non présent last extractions
-
+        dump($csv);
         foreach ($csv as $value) {
+
             if ($i > 0) {
 
                 $verif_titre = $titreRepository->findOneBy(['reference' => $value[11]]);

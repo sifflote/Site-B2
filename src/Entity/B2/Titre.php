@@ -25,7 +25,7 @@ class Titre
     #[ORM\Column(type: 'string', length: 2)]
     private $classe;
 
-    #[ORM\Column(type: 'integer')]
+    #[ORM\Column(type: 'bigint')]
     private $iep;
 
     #[ORM\Column(type: 'bigint')]

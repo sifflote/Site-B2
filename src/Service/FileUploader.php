@@ -22,7 +22,9 @@ class FileUploader
             $fileName = $safeFilename. '.' .$file->guessExtension();
         }else{
         */
-            $fileName = $safeFilename.'-'.uniqid().'.'.$file->guessExtension();
+            //$fileName = $safeFilename.'-'.uniqid().'.'.$file->guessExtension();
+        $fileName = $safeFilename.'-'.uniqid().'.csv';
+
         //}
         try {
             $file->move($this->getTargetDirectory(), $fileName);
