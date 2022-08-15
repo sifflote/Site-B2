@@ -2,6 +2,7 @@
 
 namespace App\Controller\Admin;
 
+use App\Entity\B2\Config;
 use App\Entity\B2\Observations;
 use App\Entity\B2\Uh;
 use App\Entity\Users;
@@ -36,6 +37,7 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::linkToCrud('Utilisateurs', 'fa-solid fa-users', Users::class);
 
         yield MenuItem::section('B2', 'fa-solid fa-map');
+        yield MenuItem::linkToCrud('Config', 'fa-solid fa-screwdriver-wrench', Config::class);
         yield MenuItem::linkToCrud('Observations', 'fa-solid fa-rectangle-list', Observations::class);
         yield MenuItem::linkToCrud('UH', 'fa-solid fa-list', Uh::class);
 

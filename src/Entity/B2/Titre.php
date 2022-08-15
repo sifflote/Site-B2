@@ -112,6 +112,9 @@ class Titre
     #[ORM\Column(type: 'boolean')]
     private $isInLastExtraction;
 
+    #[ORM\Column(type: 'string', length: 3, nullable: true)]
+    private $parcours = '';
+
     public function __construct()
     {
         $this->traitements = new ArrayCollection();
@@ -533,6 +536,18 @@ class Titre
     public function setIsInLastExtraction(bool $isInLastExtraction): self
     {
         $this->isInLastExtraction = $isInLastExtraction;
+
+        return $this;
+    }
+
+    public function getparcours(): ?string
+    {
+        return $this->parcours;
+    }
+
+    public function setparcours(?string $parcours): self
+    {
+        $this->parcours = $parcours;
 
         return $this;
     }

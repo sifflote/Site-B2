@@ -40,7 +40,7 @@ class StatistiquesController extends AbstractController
 
                 }
         }
-        dump($observations);
+
         //Statistiques globales
         foreach($typeList as $item){
             $global[$item] = $this->CountSumByType(0, $item)->getArrayResult()[0];

@@ -2,11 +2,13 @@
 
 namespace App\Controller\B2;
 
+use App\Entity\B2\Config;
 use App\Entity\B2\Extractions;
 use App\Entity\B2\Titre;
 use App\Entity\B2\Traitements;
 use App\Entity\B2\Uh;
 use App\Form\FileUploadType;
+use App\Repository\B2\ConfigRepository;
 use App\Repository\B2\ExtractionsRepository;
 use App\Repository\B2\ObservationsRepository;
 use App\Repository\B2\TitreRepository;
@@ -157,7 +159,8 @@ class ExtractionController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function lecture(Request         $request, FileUploader $file_uploader, EntityManagerInterface $em,
                             UhRepository    $uhRepository, ExtractionsRepository $extractionsRepository,
-                            TitreRepository $titreRepository): RedirectResponse
+                            TitreRepository $titreRepository,
+                            ConfigRepository $configRepository): RedirectResponse
     {
         $file_name = $request->get('file') . '.csv';
         $directory = $file_uploader->getTargetDirectory();
@@ -176,17 +179,51 @@ class ExtractionController extends AbstractController
         $extraction = $extractionsRepository->findOneBy(['name' => explode('part-', $file_name)[1]]);
         $newLine = 0;
         // Passé tous les titres en non présent last extractions
-        dump($csv);
+        $options = $configRepository->active($extraction->getImportAt()->format('Y-m-d H:i'));
+        foreach($options as $option){
+            $config[$option['name']] = $this->lettersToNumber($option['field']) - 1;
+        }
         foreach ($csv as $value) {
 
             if ($i > 0) {
-
-                $verif_titre = $titreRepository->findOneBy(['reference' => $value[11]]);
+                $verif_titre = $titreRepository->findOneBy(['reference' => $value[$config['Reference']]]);
                 // RPRS est un boolean si RPRS est écrit
-                $rprs = ($value[26] == 'RPRS') ? 1 : 0;
+                $rprs = ($value[$config['Rprs']] == 'RPRS') ? 1 : 0;
                 if (empty($verif_titre)) {
 
                     $titre = new Titre();
+                    foreach($config as $cle => $data){
+                        $property = 'set'.$cle;
+                        if(in_array($cle, ['EnterAt', 'ExitAt', 'CreeAt', 'RejetAt', 'NaissanceAt'])) {
+                            $date = DateTime::createFromFormat('d/m/Y', $value[$data]);
+                            $titre->{$property}($date);
+                        }elseif(in_array($cle, ['Encaissement', 'Montant', 'Restantdu'])) {
+                            $prix = $this->priceToFloat($value[$data]);
+                            $titre->{$property}($prix);
+                        }elseif(in_array($cle, ['Uh'])) {
+                            $verif_uh = $uhRepository->findOneBy(['numero' => $value[$data]]);
+                            if (isset($verif_uh)) {
+                                $titre->setUh($verif_uh);
+                            } else {
+                                $uh = new Uh();
+                                $uh->setNumero($value[$data]);
+                                $uh->setDesignation('');
+                                $uh->setAntenne('');
+                                $em->persist($uh);
+                                $em->flush();
+                                $titre->setUh($uh);
+                            }
+                        }elseif(in_array($cle, ['Observation', 'Precision', 'TraiteAt'])) {
+                            ;
+                        }
+                        elseif(in_array($cle, ['Rang', 'Insee'])){
+                            $titre->{$property}((int)$value[$data]);
+                        }
+                        else{
+                            $titre->{$property}($value[$data]);
+                        }
+                    }
+                    /*
                     $titre->setType($value[0]);
                     $titre->setClasse($value[1]);
                     $titre->setIep($value[2]);
@@ -226,8 +263,9 @@ class ExtractionController extends AbstractController
                     $titre->setContrat($value[24]);
                     $titre->setNaissanceHf($value[25]);
                     $titre->setRprs($rprs);
+                    */
                     $titre->setExtractionAt($extraction->getImportAt());
-                    //$titre->setMajAt($now);
+                    $titre->setMajAt($extraction->getImportAt());
                     $newLine++;
                     $titre->setIsInLastExtraction(1);
                     $em->persist($titre);
@@ -282,6 +320,7 @@ class ExtractionController extends AbstractController
                            ExtractionsRepository $extractionsRepository,
                            TraitementsRepository $traitementsRepository,
                            TitreRepository       $titreRepository, ObservationsRepository $observationsRepository,
+                           ConfigRepository      $configRepository,
                            UserInterface         $user): RedirectResponse
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
@@ -301,21 +340,27 @@ class ExtractionController extends AbstractController
         }
         $extraction = $extractionsRepository->findOneBy(['name' => explode('part-', $file_name)[1]]);
         $maj_obs = 0;
+        $options = $configRepository->active($extraction->getImportAt()->format('Y-m-d H:i'));
+        foreach($options as $option){
+            $config[$option['name']] = $this->lettersToNumber($option['field']) - 1;
+        }
         // Vérification de chaque ligne
         foreach ($csv as $value) {
 
             if ($i > 0) {
                 // On récupère le titre existant dans la BDD
-                $titre = $titreRepository->findOneBy(['reference' => $value[11]]);
+                $titre = $titreRepository->findOneBy(['reference' => $value[$config['Reference']]]);
 
                 //Vérifier si traitement existant
                 $traitement = $traitementsRepository->findBy(['titre' => $titre->getId()], ['traite_at' => 'DESC'], 1, 0);
 
                 if ($extraction->getWithObs()) {
-                    if($value[28] === ''){
+                    //if($value[28] === ''){
+                    if($value[$config['Observation']] === ''){
                         $recherche = 'NOUVEAU';
                     }else{
-                        $recherche = $value[28];
+                        //$recherche = $value[28];
+                        $recherche = $value[$config['Observation']];
                     }
                     $observation = $observationsRepository->findOneBy(['name' => $recherche]);
                 }else{
@@ -333,11 +378,12 @@ class ExtractionController extends AbstractController
                         $ttt->setTitre($titre);
                         $ttt->setObservation($observation);
                         $ttt->setUser($user);
-                        $ttt->setPrecisions($value[29]);
-                        if ($value[30] == "") {
-                            $valeur30 = DateTimeImmutable::createFromFormat('d/m/Y', $value[18]);
+                        //$ttt->setPrecisions($value[29]);
+                        $ttt->setPrecisions($value[$config['Precision']]);
+                        if ($value[$config['TraiteAt']] == "") {
+                            $valeur30 = DateTimeImmutable::createFromFormat('d/m/Y', $value[$config['CreeAt']]);
                         } else {
-                            $valeur30 = DateTimeImmutable::createFromFormat('d/m/Y', $value[30]);
+                            $valeur30 = DateTimeImmutable::createFromFormat('d/m/Y', $value[$config['TraiteAt']]);
                         }
 
                         $ttt->setTraiteAt($valeur30);
@@ -626,5 +672,22 @@ class ExtractionController extends AbstractController
         }
     }
 
+    /*
+     * lettersToNumber("A"); //returns 1
+     * lettersToNumber("E"); //returns 5
+     * lettersToNumber("Z"); //returns 26
+     * lettersToNumber("AB"); //returns 28
+     * lettersToNumber("AP"); //returns 42
+     * lettersToNumber("CE"); //returns 83
+     */
+    function lettersToNumber($letters){
+        $alphabet = range('A', 'Z');
+        $number = 0;
+
+        foreach(str_split(strrev($letters)) as $key=>$char){
+            $number = $number + (array_search($char,$alphabet)+1)*pow(count($alphabet),$key);
+        }
+        return $number;
+    }
 
 }
